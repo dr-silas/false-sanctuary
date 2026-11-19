@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>偽りの聖堂 - False Sanctuary</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #09090d;
+    --panel-bg: rgba(18, 18, 26, 0.94);
+    --gold: #c5a663;
+    --gold-dim: #6e5c36;
+    --crimson: #b01e38;
+    --purple: #6f2da8;
+    --ice: #8bb8c4;
+    --text-main: #eae8e3;
+    --text-muted: #8e8b84;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: #050508;
+    color: var(--text-main);
+    font-family: 'Shippori Mincho', serif;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #game-container {
+    width: 100%;
+    max-width: 960px;
+    min-height: 100dvh;
+    border-left: 1px solid var(--gold-dim);
+    border-right: 1px solid var(--gold-dim);
+    background: radial-gradient(circle at 50% 20%, #1d1926 0%, #09090d 75%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
+  }
+
+  /* 1. ヘッダー */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #0d0d14;
+    border-bottom: 1px solid var(--gold-dim);
+    gap: 8px;
+    z-index: 5;
+  }
+
+  .stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.88rem;
+  }
+
+  .stat-item span {
+    color: var(--gold);
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  .police-gauge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bar-bg {
+    width: 85px;
+    height: 9px;
+    background: #1f1f29;
+    border: 1px solid #444;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    transition: width 0.4s ease, background-color 0.4s ease;
+  }
+
+  #police-fill { background: var(--crimson); width: 0%; }
+  .danger-pulse { animation: pulseRed 1.2s infinite; }
+
+  @keyframes pulseRed {
+    0%, 100% { box-shadow: 0 0 4px var(--crimson); }
+    50% { box-shadow: 0 0 14px #ff2a55; }
+  }
+
+  .menu-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  button.nav-btn {
+    background: #171722;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 5px 10px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button.nav-btn:hover, button.nav-btn:active {
+    background: var(--gold-dim);
+    color: #fff;
+  }
+
+  button.nav-btn.sacrifice-ready {
+    border-color: var(--crimson);
+    color: #ff6b81;
+    animation: pulseRed 1.5s infinite;
+  }
+
+  /* 2. ニュースティッカー */
+  .ticker {
+    background: #131118;
+    border-bottom: 1px solid #292533;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .ticker span {
+    color: var(--gold);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+
+  /* 3. メインステージ（聖堂） */
+  main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px 14px;
+    gap: 12px;
+    background-image: 
+      radial-gradient(ellipse at top, rgba(197, 166, 99, 0.08), transparent 65%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 50px);
+  }
+
+  .stage-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 10px;
+    z-index: 2;
+  }
+
+  /* 相談者ステータス */
+  .target-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dim);
+    padding: 10px 12px;
+    flex: 1;
+    max-width: 310px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  }
+
+  .target-title {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 8px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+  }
+
+  .gauge-row {
+    margin-bottom: 7px;
+    font-size: 0.82rem;
+  }
+
+  .gauge-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+
+  .gauge-row .bar-bg { width: 100%; height: 7px; }
+  #sanity-fill { background: var(--ice); }
+  #fanatic-fill { background: linear-gradient(90deg, var(--purple), var(--crimson)); }
+
+  .weakness-box {
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px dashed #333;
+    font-size: 0.82rem;
+    color: #ccc;
+  }
+  .weakness-val { color: #ff8fa3; font-weight: 600; }
+
+  /* 相談者シルエット演出 */
+  .silhouette-area {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.85;
+  }
+
+  .person-silhouette {
+    width: 140px;
+    height: 200px;
+    background: radial-gradient(circle at 50% 25%, #16161f 26px, transparent 28px),
+                radial-gradient(ellipse at 50% 85%, #12121a 60px, transparent 62px);
+    position: relative;
+    filter: drop-shadow(0 0 12px rgba(0,0,0,0.95));
+  }
+
+  .eyes {
+    position: absolute;
+    top: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+  }
+
+  .eye {
+    width: 6px;
+    height: 3px;
+    background: var(--ice);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--ice);
+    transition: 0.5s;
+  }
+
+  .eye.fanatic-mid {
+    background: #d980fa;
+    box-shadow: 0 0 10px #d980fa;
+    transform: scale(1.3);
+  }
+
+  .eye.fanatic-high {
+    background: #ff2a55;
+    box-shadow: 0 0 16px #ff2a55;
+    transform: scale(1.8);
+  }
+
+  /* 常識ロック一覧 */
+  .locks-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dim);
+    padding: 10px 12px;
+    flex: 1;
+    max-width: 290px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  }
+
+  .locks-header {
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 6px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+  }
+
+  .lock-item {
+    font-size: 0.82rem;
+    padding: 5px 7px;
+    margin-bottom: 5px;
+    background: #14141c;
+    border-left: 3px solid var(--ice);
+    transition: 0.3s;
+  }
+
+  .lock-item.broken {
+    border-left-color: var(--crimson);
+    background: rgba(176, 30, 56, 0.18);
+    color: #ff758f;
+    text-decoration: line-through;
+  }
+
+  /* セリフウィンドウ */
+  .dialogue-box {
+    background: rgba(11, 11, 17, 0.96);
+    border: 1px solid var(--gold);
+    padding: 12px 16px;
+    min-height: 115px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.85);
+  }
+
+  .speaker-name {
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+
+  .dialogue-text {
+    font-size: 0.96rem;
+    line-height: 1.55;
+    color: #f2f0eb;
+  }
+
+  .system-log {
+    font-size: 0.8rem;
+    color: #b0aba0;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #242430;
+    line-height: 1.4;
+  }
+
+  /* 4. アクションエリア */
+  .action-area {
+    background: #0c0c12;
+    border-top: 1px solid var(--gold-dim);
+    padding: 10px 14px 16px;
+    z-index: 3;
+  }
+
+  .sub-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .sub-btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .observe-btn {
+    background: #181c29;
+    color: var(--ice);
+    border: 1px solid #4a6b75;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .observe-btn:hover:not(:disabled) {
+    background: #253042;
+    color: #fff;
+  }
+
+  .forbidden-btn {
+    background: #241326;
+    color: #e082ff;
+    border: 1px solid #7c3896;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .forbidden-btn:hover:not(:disabled) {
+    background: #3d1d42;
+    color: #fff;
+  }
+
+  .hint-guide {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .command-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cmd-card {
+    background: #15151e;
+    border: 1px solid #3d3524;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cmd-card:hover:not(:disabled), .cmd-card:active:not(:disabled) {
+    border-color: var(--gold);
+    background: #22202d;
+  }
+
+  .cmd-card:disabled, .observe-btn:disabled, .forbidden-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cmd-tag {
+    font-size: 0.78rem;
+    color: var(--gold);
+    font-weight: 800;
+  }
+
+  .cmd-preview {
+    font-size: 0.85rem;
+    color: #e0ddd7;
+    line-height: 1.38;
+  }
+
+  /* モーダルウィンドウ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    padding: 14px;
+  }
+
+  .modal-box {
+    background: #12121a;
+    border: 1px solid var(--gold);
+    width: 100%;
+    max-width: 640px;
+    max-height: 88dvh;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    color: var(--gold);
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0 6px;
+  }
+
+  .role-slot {
+    border: 1px solid #333;
+    padding: 10px;
+    background: #181822;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .role-slot-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  select.role-select {
+    background: #0f0f15;
+    color: var(--text-main);
+    border: 1px solid var(--gold-dim);
+    padding: 6px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  .follower-list-item {
+    border: 1px solid #2c2c3a;
+    padding: 10px;
+    background: #16161f;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .event-choice-btn {
+    background: #191924;
+    border: 1px solid var(--gold-dim);
+    color: var(--text-main);
+    padding: 12px;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .event-choice-btn:hover {
+    border-color: var(--gold);
+    background: #252333;
+  }
+
+  .primary-btn {
+    background: var(--gold-dim);
+    color: #fff;
+    border: 1px solid var(--gold);
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    align-self: center;
+    margin-top: 6px;
+  }
+  .primary-btn:hover { background: var(--gold); color: #000; }
+
+  /* === スマホ縦画面（レスポンシブ）対応 === */
+  @media (max-width: 680px) {
+    header {
+      padding: 8px 10px;
+    }
+    .stats-bar {
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+    .bar-bg {
+      width: 65px;
+    }
+    .menu-buttons {
+      width: 100%;
+      justify-content: space-between;
+    }
+    button.nav-btn {
+      flex: 1;
+      text-align: center;
+      padding: 6px 4px;
+      font-size: 0.76rem;
+    }
+    .stage-top {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .target-card, .locks-card {
+      max-width: 100%;
+      width: 100%;
+      padding: 8px 10px;
+    }
+    .locks-card {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .locks-header {
+      width: 100%;
+      margin-bottom: 2px;
+      font-size: 0.8rem;
+    }
+    .lock-item {
+      margin-bottom: 0;
+      font-size: 0.78rem;
+      padding: 4px 6px;
+    }
+    .silhouette-area {
+      top: 52%;
+      opacity: 0.35;
+    }
+    .dialogue-box {
+      padding: 10px 12px;
+      min-height: 105px;
+    }
+    .dialogue-text {
+      font-size: 0.9rem;
+    }
+    .command-grid {
+      grid-template-columns: 1fr;
+      gap: 7px;
+    }
+    .cmd-card {
+      padding: 9px 11px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- 1. ヘッダー -->
+  <header>
+    <div class="stats-bar">
+      <div class="stat-item"><span id="day-num">1</span>日目</div>
+      <div class="stat-item">狂信者:<span id="fanatic-count">0</span>人</div>
+      <div class="police-gauge-wrap">
+        <div>捜査:<strong id="police-text">0%</strong></div>
+        <div class="bar-bg" id="police-bar-box"><div class="bar-fill" id="police-fill"></div></div>
+      </div>
+    </div>
+    <div class="menu-buttons">
+      <button class="nav-btn" onclick="openModal('roles')">聖堂の役職</button>
+      <button class="nav-btn" onclick="openModal('archive')">狂信者名簿</button>
+      <button class="nav-btn" id="sacrifice-btn" onclick="openModal('sacrifice')">身代わり</button>
+      <button class="nav-btn" onclick="openModal('retire')">教団の決断</button>
+    </div>
+  </header>
+
+  <!-- 2. ニュースティッカー -->
+  <div class="ticker">
+    <span>📰 世間の噂</span><em id="news-text">【匿名掲示板】「駅前の古い聖堂、最近やたら人が出入りしてるけど何の宗教？」</em>
+  </div>
+
+  <!-- 3. メインステージ -->
+  <main>
+    <div class="stage-top">
+      <!-- 左：相談者ステータス -->
+      <div class="target-card">
+        <div class="target-title" id="target-job">疲弊した中堅会社員</div>
+        <div class="gauge-row">
+          <div class="gauge-label"><span>理性（警戒心）</span><span id="sanity-val">100%</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="sanity-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-label"><span>狂信度</span><span id="fanatic-val">0%</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="fanatic-fill" style="width: 0%;"></div></div>
+        </div>
+        <div class="weakness-box">
+          隠された弱点: <span class="weakness-val" id="target-weakness">？？？</span>
+        </div>
+      </div>
+
+      <!-- 右：常識ロック -->
+      <div class="locks-card">
+        <div class="locks-header">守っている常識（すべて破壊で狂信化）</div>
+        <div id="locks-container" style="display:flex; flex-direction:column; gap:4px; width:100%;"></div>
+      </div>
+    </div>
+
+    <!-- 中央シルエット -->
+    <div class="silhouette-area">
+      <div class="person-silhouette">
+        <div class="eyes">
+          <div class="eye" id="eye-l"></div>
+          <div class="eye" id="eye-r"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 下：セリフウィンドウ -->
+    <div class="dialogue-box">
+      <div>
+        <div class="speaker-name" id="speaker-name">相談者</div>
+        <div class="dialogue-text" id="dialogue-text">「……お願いします、誰かに話を聞いてほしくてここに来ました」</div>
+      </div>
+      <div class="system-log" id="system-log">まずは【沈黙】で相手を観察するか、言葉を選んで心を揺さぶりましょう。</div>
+    </div>
+  </main>
+
+  <!-- 4. アクションエリア -->
+  <div class="action-area" id="action-area">
+    <div class="sub-actions">
+      <div class="sub-btn-group">
+        <button class="observe-btn" id="observe-btn" onclick="doObserve()">👁️ 沈黙（観察）</button>
+        <button class="forbidden-btn" id="forbidden-btn" onclick="openModal('forbidden')">📖 禁断の教義 (<span id="forbidden-count">0</span>/8)</button>
+      </div>
+      <div class="hint-guide" id="role-bonus-info">役職: なし</div>
+    </div>
+    <div class="command-grid" id="command-grid"></div>
+  </div>
+
+  <!-- モーダル -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// 1. 全マスターデータ（25×25×10×10 + 54フレーズ + 禁断8種 + イベント8種）
+// ==========================================
+
+const JOBS = [
+  { name: "疲弊した中堅会社員", tag: "normal" },
+  { name: "資産家の未亡人", tag: "rich" },
+  { name: "受験に失敗し続ける浪人生", tag: "normal" },
+  { name: "鳴かず飛ばずの舞台俳優", tag: "actor" },
+  { name: "激務に追われる勤務医", tag: "medical" },
+  { name: "かつて正義感に燃えていた元刑事", tag: "police" },
+  { name: "孤独な老後を送る元教師", tag: "normal" },
+  { name: "夫の浮気に気づいた専業主婦", tag: "normal" },
+  { name: "業績不振に悩む中小企業の社長", tag: "rich" },
+  { name: "SNSの誹謗中傷に怯えるインフルエンサー", tag: "actor" },
+  { name: "親の介護に人生を捧げる独身男性", tag: "normal" },
+  { name: "信仰に迷い始めた他教会の神父", tag: "normal" },
+  { name: "過去の過ちを隠す地方議員", tag: "police" },
+  { name: "才能の枯渇を恐れる小説家", tag: "scholar" },
+  { name: "夜職で心をすり減らした若い女性", tag: "normal" },
+  { name: "医療ミスを揉み消した過去を持つ看護師", tag: "medical" },
+  { name: "遺産相続で親族と骨肉の争いをしている次男", tag: "rich" },
+  { name: "指導した生徒に裏切られた元スポーツ監督", tag: "normal" },
+  { name: "定年退職後に居場所を失った元エリート銀行員", tag: "rich" },
+  { name: "自分の容姿の衰えに怯える元モデル", tag: "actor" },
+  { name: "ネット投資で全財産を溶かした元IT起業家", tag: "normal" },
+  { name: "厳格な家庭で育ち反抗期を知らない優等生", tag: "normal" },
+  { name: "事故で愛するペットを亡くしたペットロス女性", tag: "normal" },
+  { name: "職場のハラスメントを告発できず病んだ公務員", tag: "normal" },
+  { name: "誰にも理解されない研究に没頭する大学准教授", tag: "scholar" }
+];
+
+const WORRIES = [
+  "「毎晩、誰かに見張られているような気がして眠れないのです」",
+  "「どれだけ働いても、通帳の数字が増えるだけで心が空っぽなのです」",
+  "「大切な家族が重い病に倒れ、医者にも見放されてしまいました」",
+  "「昔、自分の保身のために無実の人間を陥れたことが忘れられません」",
+  "「周りからは幸せそうに見られますが、本当は死にたいほど孤独です」",
+  "「努力しても報われず、自分には生きる価値がないと毎日思います」",
+  "「愛していたはずのパートナーが、今はただの醜い怪物に見えます」",
+  "「多額の借金を抱え、明日にもすべてを失う瀬戸際にいます」",
+  "「世の中の人間すべてが、私を嘲笑っているように聞こえるのです」",
+  "「自分の老いと死が恐ろしくて、一分一秒が耐えられません」",
+  "「正しいことをしてきたはずなのに、なぜ私ばかりが損をするのでしょうか」",
+  "「誰にも言えない暗い衝動を、自分の中で抑えきれなくなっています」",
+  "「信じていた仲間に裏切られ、人間というものが信じられなくなりました」",
+  "「自分が何のために生きているのか、鏡を見ても誰だか分かりません」",
+  "「罪悪感で胸が張り裂けそうです。誰かに罰を与えてほしいのです」",
+  "「夜になると、亡くなったはずの人の声が耳元で囁くのです」",
+  "「愛する子供が自分の思い通りに育たず、憎しみさえ湧いてしまいます」",
+  "「もし明日すべてが消えてなくなれば、どんなに楽だろうと考えてしまいます」",
+  "「人に嫌われるのが怖くて、毎日笑顔の仮面を貼り付けて生きています」",
+  "「自分がこれまで積み上げてきたものが、すべて偽物だった気がします」",
+  "「何をしても心が動かず、まるでガラスケースの中から世界を見ているようです」",
+  "「誰かにすべてを決めてほしい。自分で選択することに疲れ果てました」",
+  "「私を苦しめたあいつらが、のうのうと幸せに生きているのが許せません」",
+  "「自分の中に別の誰かが住んでいるようで、ふとした瞬間に記憶が飛びます」",
+  "「神様がいるのなら、なぜ私にだけこんな残酷な試練を与えるのでしょうか」"
+];
+
+const LOCKS_DATA = [
+  { id: "family", name: "家族への情愛", resist: "「……いいえ、それでも家族は私にとって大切な存在です。裏切れません」", breakMsg: "「分かりました……家族という名の呪いを捨てます。今日から教祖様だけが私の血族です」" },
+  { id: "law", name: "法と倫理観", resist: "「そんなことをしたら、人として道を外れてしまいます……！」", breakMsg: "「法律も道徳も、愚かな羊を縛る鎖でした。教祖様の言葉こそが唯一の正義です」" },
+  { id: "pride", name: "世間体とプライド", resist: "「周りの人間にどう思われるか……私には守るべき立場があるんです」", breakMsg: "「世間の目などゴミ同然です！狂人と呼ばれようと、私は教祖様の僕になります」" },
+  { id: "self", name: "自己責任の意識", resist: "「私が苦しいのは、すべて私自身の努力が足りなかったせいですから……」", breakMsg: "「私は悪くなかった……！すべては世界と悪魔のせいだったのですね、教祖様！」" },
+  { id: "money", name: "金銭・物質への執着", resist: "「綺麗事だけでは生きていけません。お金だけが私を守ってくれるんです」", breakMsg: "「通帳も権利書もすべて捧げます！こんな汚れた紙切れ、救いの前では無価値です！」" },
+  { id: "science", name: "理性・科学的思考", resist: "「奇跡だなんて……そんな非科学的な話、信じられるわけがありません」", breakMsg: "「私の浅はかな知性など捨て去りました。教祖様の御業こそがすべての真理です……！」" },
+  { id: "glory", name: "過去の栄光・経歴", resist: "「私だって、かつては人から尊敬される立場だったんです……！」", breakMsg: "「過去の栄光などただの泥でした。今の私は、教祖様に拾われた名もなき器に過ぎません」" },
+  { id: "empathy", name: "他者への同情心", resist: "「私よりもっと辛い思いをしている人がいるのに、自分だけ救われるなんて……」", breakMsg: "「他人のことなどどうでもいい！私だけが救われれば、それでいいのです！」" },
+  { id: "hope", name: "未来へのわずかな希望", resist: "「もう少し我慢すれば、きっと状況は良くなるはずですから……」", breakMsg: "「明日など来なくていい……今この瞬間、教祖様の足元で永遠の安らぎを得られるのなら！」" },
+  { id: "defense", name: "自己防衛の本能", resist: "「……どうして私にそこまで優しくするのですか？何か裏があるのでは……」", breakMsg: "「疑って申し訳ありませんでした……！私の心も体も、すべてお好きにお使いください！」" }
+];
+
+const WEAKNESSES_DATA = [
+  { id: "praise", name: "承認飢餓", hint: "（チラチラとあなたの顔色を窺っている）「……誰も、私がどれだけ頑張ってきたか一言も褒めてくれないんです」" },
+  { id: "blame", name: "他責思考", hint: "（拳を握りしめ、周囲を呪うように呟く）「……私だって被害者なんです。あいつらさえいなければ……」" },
+  { id: "punish", name: "被虐・贖罪欲求", hint: "（爪を噛みながら怯えた目で見上げる）「……お願いです、私を叱ってください。汚れた私に罰を与えてください……」" },
+  { id: "stopthink", name: "思考停止願望", hint: "（焦点の合わない目で床を見つめ肩を落とす）「……もう、自分で決めるのは疲れました。右へ行けと言われれば右へ行きます……」" },
+  { id: "revenge", name: "復讐心", hint: "（歯ぎしりし、瞳の奥に暗い炎を宿す）「……許せない。私を笑った連中が地獄に落ちるのを見ないと気が済まない……」" },
+  { id: "chosen", name: "選民願望", hint: "（世間を鼻で笑うように呟く）「……周りの人間はみんな愚かな羊ばかりだ。私とは住む世界が違うんです」" },
+  { id: "ruin", name: "破滅願望", hint: "（乾いた笑い声を漏らし、自分の持ち物を傷つけている）「……いっそ全部燃えてしまえばいいのに。何もかもゼロになれば楽なのに……」" },
+  { id: "depend", name: "依存体質", hint: "（法衣の裾にすがりつくように身を乗り出す）「……一人にしないでください。あなただけが頼りなんです……」" },
+  { id: "apocalypse", name: "終末思想", hint: "（窓の外の空を虚ろに見上げ深くため息をつく）「……この世界はもう腐りきっています。早くすべてが終わってしまえばいいのに……」" },
+  { id: "secret", name: "秘密の共有欲", hint: "（周囲をキョロキョロ確認し耳元に顔を近づける）「……これ、誰にも言ったことがないんです。教祖様と私だけの秘密にしてくれますか……？」" }
+];
+
+// 洗脳コマンド（6系統 × 3バリエーション × 3段階 = 54フレーズ）
+const COMMANDS_DATA = [
+  {
+    type: "affirm", label: "【全肯定】甘やかし",
+    targetLocks: ["self", "defense"], targetWeakness: ["praise", "depend"],
+    sanityDelta: +18, fanaticBase: 16,
+    variations: [
+      [
+        "「よくここまで耐えてきましたね。ここではもう、強いふりをしなくていいのですよ」",
+        "「あなたの涙は汚れではありません。それだけ魂が純粋だという証なのです」",
+        "「さあ、すべての重荷を私に預けなさい。あなたはただ、私の言葉に身を委ねていればいい」"
+      ],
+      [
+        "「あなたが苦しんでいるのは、あなたのせいではありません。時代と環境が歪んでいるのです」",
+        "「あなたは決して弱くなどない。ただ、優しすぎたために周囲に利用されただけなのです」",
+        "「あなたを傷つけた者たちこそが罪人です。あなたは一ミリも悪くないのですよ」"
+      ],
+      [
+        "「生きているだけで十分なのです。誰の期待にも応えなくていいのですよ」",
+        "「あなたが流した血と涙は、すべてこの私が覚えておきます。もう孤独ではありません」",
+        "「あなたの存在そのものが美しい。ただ私の隣で呼吸をしていれば、それで救われるのです」"
+      ]
+    ]
+  },
+  {
+    type: "isolate", label: "【孤立化】分断",
+    targetLocks: ["family", "pride", "empathy"], targetWeakness: ["depend"],
+    sanityDelta: -12, fanaticBase: 22,
+    variations: [
+      [
+        "「どれほど親しい人間でも、他人の痛みを本当の意味で分かち合うことはできません」",
+        "「ご家族の言葉が虚しく響くのは、彼らの魂があなたとは違う次元にあるからです」",
+        "「血の繋がりも世間の目も、あなたの魂を縛り付ける錆びた鎖に過ぎません。断ち切りなさい」"
+      ],
+      [
+        "「外の世界は騒がしすぎます。ここでは誰の目も気にする必要はありません」",
+        "「周囲の人間は、あなたが自分の殻を破って目覚めることを恐れて引き止めているのです」",
+        "「俗世の人間はみな眠っています。目覚めたあなたとは、もう住む世界が違うのですよ」"
+      ],
+      [
+        "「外の世界の言葉は毒を含んでいます。聞くほどにあなたの魂は傷ついていく」",
+        "「友人たちの『心配している』という言葉ほど、無責任で残酷なものはありませんね」",
+        "「耳を塞ぎなさい。この聖堂の外から聞こえる声は、すべてあなたを地獄へ引きずり込む雑音です」"
+      ]
+    ]
+  },
+  {
+    type: "fear", label: "【恐怖】破滅の予言",
+    targetLocks: ["money", "science", "hope"], targetWeakness: ["ruin", "apocalypse"],
+    sanityDelta: -24, fanaticBase: 32,
+    variations: [
+      [
+        "「目に見えるものだけを信じていると、足元から忍び寄る影に気づけませんよ」",
+        "「あなたの魂には、すでに暗い澱（おり）が溜まっています。放置すれば取り返しがつきません」",
+        "「今ここで救いの手を拒めば、あなたの魂は永遠の闇に堕ちることになります。それでもいいのですか？」"
+      ],
+      [
+        "「お金や地位が、夜の孤独や死の恐怖を和らげてくれたことが一度でもありましたか？」",
+        "「あなたが必死に守っているその財産こそが、不幸を引き寄せる呪いの元凶なのです」",
+        "「汚れた金も虚飾の地位も、すべてここに置いていきなさい。身軽にならねば救われません」"
+      ],
+      [
+        "「人の命はロウソクの火と同じ。明日も燃えている保証などどこにもないのですよ」",
+        "「迷っている一秒の間にも、あなたの魂は腐敗し続けています。手遅れになってもいいのですか？」",
+        "「今この扉を出れば、二度と救いの光は差し込みません。永遠の暗闇の中で後悔し続けることになりますよ」"
+      ]
+    ]
+  },
+  {
+    type: "special", label: "【特別視】選民思想",
+    targetLocks: ["glory", "law", "pride"], targetWeakness: ["chosen", "praise"],
+    sanityDelta: -14, fanaticBase: 25,
+    variations: [
+      [
+        "「深い苦しみを知る者だけが、真理の扉の前に立つ資格を与えられるのです」",
+        "「あなたがこれまで味わった絶望は、神があなたを特別な器として鍛えるための儀式でした」",
+        "「あなたは選ばれたのです。凡人には決して理解できない、聖なる使命を背負うために」"
+      ],
+      [
+        "「人の作った小さなルールに縛られて、本来の輝きを殺してしまってはいけません」",
+        "「覚醒した者には、一般の道徳とは異なる『より高い秩序』が適用されるのです」",
+        "「もはや世俗の法などあなたを裁けません。私の言葉こそが、あなたの新しい掟なのです」"
+      ],
+      [
+        "「凡人は痛みから逃げますが、あなたはそれに耐え抜くだけの強い魂を持って生まれてきた」",
+        "「その傷跡こそが、あなたが神に愛されている証の刻印なのですよ」",
+        "「さあ、選ばれし者よ。あなたのその高潔な魂を、私の聖なる計画のために捧げなさい」"
+      ]
+    ]
+  },
+  {
+    type: "punish", label: "【断罪】懲罰と支配",
+    targetLocks: ["self", "glory"], targetWeakness: ["punish", "stopthink"],
+    sanityDelta: -18, fanaticBase: 28,
+    variations: [
+      [
+        "「甘えを捨てなさい。あなたが苦しむのは、まだ過去の罪を清算していないからです」",
+        "「自分の頭で考えるから迷うのです。愚かな自我を捨て、私の規律に従いなさい」",
+        "「さあ、膝をつきなさい。私にすべてを委ね、思考を止めたとき、あなたの罪は許されるのです」"
+      ],
+      [
+        "「『自由』という言葉に騙されてはいけません。人は枠組みを与えられて初めて安らげるのです」",
+        "「あなたが苦しむのは、自分で自分の人生を操ろうとする傲慢さがあるからです」",
+        "「すべての決定権を私に差し出しなさい。私の操り人形になったとき、あなたは真の自由を得るのです」"
+      ],
+      [
+        "「その薄汚れたプライドが、あなたの魂を救いから遠ざけているのです」",
+        "「ひれ伏しなさい。過去の名誉も知性も、この聖堂の床に擦りつけて捨て去るのです」",
+        "「よくできました。もはやあなたは考える必要のない、私の最も忠実な道具です」"
+      ]
+    ]
+  },
+  {
+    type: "curse", label: "【共犯】呪詛の共有",
+    targetLocks: ["law", "empathy"], targetWeakness: ["revenge", "blame", "secret"],
+    sanityDelta: -18, fanaticBase: 28,
+    variations: [
+      [
+        "「綺麗な言葉で飾る必要はありません。あなたの心の奥にある『黒い感情』を私に見せなさい」",
+        "「あなたを傷つけた連中への憎しみは正当なものです。神はあなたの怒りを肯定しています」",
+        "「これは私とあなただけの聖なる契約です。俗世の連中に、私たちが鉄槌を下すのです」"
+      ],
+      [
+        "「綺麗な世界などどこにもありません。誰もが仮面の下で牙を研いでいるのです」",
+        "「奪われたのなら、奪い返せばいい。傷つけられたのなら、それ以上の痛みを返してやりましょう」",
+        "「私と手を組みなさい。この腐りきった世界を内側から食い尽くす、共犯者になるのです」"
+      ],
+      [
+        "「誰にも言えないその秘密を、私だけに打ち明けなさい。私は決してあなたを裁きません」",
+        "「秘密を共有した瞬間から、私たちは運命共同体です。もう後戻りはできませんよ」",
+        "「さあ、この聖なる共犯関係に誓いなさい。あなたの魂のすべてを私に捧げると」"
+      ]
+    ]
+  }
+];
+
+// 禁断の教義（アンロック式特殊コマンド8種）
+const FORBIDDEN_DATA = [
+  {
+    id: "stigmata", name: "【偽りの聖痕】奇跡の演出",
+    condText: "医療関係者（医師・看護師）を狂信化させる",
+    line: "「見なさい、あなたの苦しみに呼応して私の掌から聖なる血が溢れ出しました……これが神の答えです」",
+    desc: "【理性・科学】【自己防衛】を一撃破壊＋警戒心を全回復",
+    effect: (t) => {
+      t.sanity = 100;
+      t.fanatic = Math.min(100, t.fanatic + 25);
+      breakSpecificLocks(t, ["science", "defense"]);
+      return "掌の仕掛けから血を流し、相手は奇跡を目の当たりにして完全に心酔した！";
+    }
+  },
+  {
+    id: "wealth", name: "【魂の負債譲渡】全財産吸収",
+    condText: "富裕層（未亡人・社長・銀行員等）を狂信化させる",
+    line: "「あなたの財産に憑りついた悪霊を私が引き受けましょう。その呪われた通帳と印鑑をここに置きなさい」",
+    desc: "【金銭執着】を一撃破壊＋警察捜査レベルを15%下げる",
+    effect: (t) => {
+      t.fanatic = Math.min(100, t.fanatic + 30);
+      state.police = Math.max(0, state.police - 15);
+      breakSpecificLocks(t, ["money"]);
+      return "巻き上げた大金で裏工作を行い、警察の捜査レベルが15%低下した！";
+    }
+  },
+  {
+    id: "erasure", name: "【過去の消去儀式】戸籍と記憶の抹消",
+    condText: "権力者（元刑事・地方議員）を狂信化させる",
+    line: "「古いあなたは今この瞬間に死にました。名前も過去も捨て、私の元で新しい命として生まれ変わるのです」",
+    desc: "【過去の栄光】【世間体】を一撃破壊＋狂信度+30%",
+    effect: (t) => {
+      t.fanatic = Math.min(100, t.fanatic + 30);
+      breakSpecificLocks(t, ["glory", "pride"]);
+      return "社会的地位への執着が完全に消え去り、相手は名もなき器となった！";
+    }
+  },
+  {
+    id: "pseudofamily", name: "【愛の転移】擬似家族化",
+    condText: "累計3人以上を狂信化させる",
+    line: "「血の繋がりなど肉の幻想に過ぎません。魂で結ばれた私こそが、あなたの本当の父であり、母であり、恋人なのです」",
+    desc: "【家族への情愛】を一撃破壊＋狂信度+40%",
+    effect: (t) => {
+      t.fanatic = Math.min(100, t.fanatic + 40);
+      breakSpecificLocks(t, ["family"]);
+      return "家族への愛情がすべて教祖への異常な執着へと塗り替えられた！";
+    }
+  },
+  {
+    id: "hysteria", name: "【終末のカウントダウン】集団ヒステリー",
+    condText: "聖堂の3つの役職すべてに信者を配置する",
+    line: "「聞きなさい、外で祈る同胞たちの声を！審判の日はもう目の前まで迫っているのです！」",
+    desc: "残っている常識ロックをランダムに1つ破壊＋【未来への希望】破壊",
+    effect: (t) => {
+      t.fanatic = Math.min(100, t.fanatic + 30);
+      breakSpecificLocks(t, ["hope"]);
+      const rem = t.locks.find(l => !l.broken);
+      if (rem) rem.broken = true;
+      return "聖堂全体に響く信者たちの異様な詠唱が、相手の理性を圧し折った！";
+    }
+  },
+  {
+    id: "indulgence", name: "【罪の免罪符】ダーク・カタルシス",
+    condText: "累計5人以上を狂信化させる",
+    line: "「私があなたのすべての罪を許します。これからあなたが犯すどんな過ちも、神の御心として祝福されるのです」",
+    desc: "【法と倫理観】【自己責任】を同時破壊＋狂信度+35%",
+    effect: (t) => {
+      t.fanatic = Math.min(100, t.fanatic + 35);
+      breakSpecificLocks(t, ["law", "self"]);
+      return "罪悪感から解放された相手は、道徳も法律も捨てて教祖にひれ伏した！";
+    }
+  },
+  {
+    id: "incense", name: "【催眠の香炉】感覚遮断",
+    condText: "知識人（准教授・小説家）を狂信化させる",
+    line: "「深く息を吸いなさい……この聖なる煙が、あなたの脳を縛る雑念をすべて溶かしていきます……」",
+    desc: "弱点トリガーを強制開示＋狂信度+35%（警戒心減少なし）",
+    effect: (t) => {
+      t.weaknessRevealed = true;
+      t.fanatic = Math.min(100, t.fanatic + 35);
+      return `怪しい香の煙によって意識が朦朧とし、弱点【${t.weakness.name}】が完全に露わになった！`;
+    }
+  },
+  {
+    id: "brand", name: "【絶対服従の刻印】人格の完全破壊",
+    condText: "累計8人以上を狂信化させる",
+    line: "「もう言葉はいりません。私の瞳の奥を見つめなさい……あなたの魂は、最初から私の所有物だったのです」",
+    desc: "狂信度が60%以上なら残りの常識ロックをすべて無視して即座に狂信化",
+    effect: (t) => {
+      if (t.fanatic >= 60) {
+        t.locks.forEach(l => l.broken = true);
+        t.fanatic = 100;
+        return "深い暗示によって自我が完全に崩壊し、相手は人形のように頷いた！";
+      } else {
+        t.fanatic = Math.min(100, t.fanatic + 30);
+        return "まだ狂信度が足りず完全支配には至らなかったが、精神を大きく削った！";
+      }
+    }
+  }
+];
+
+const REPORT_LINES = [
+  "「……待てよ。あんた、さっきから私の弱みにつけ込んでるだけじゃないか！」",
+  "「目が覚めたわ。ここは神聖な場所なんかじゃない、ただの詐欺師の巣窟よ！」",
+  "「ふざけるな！人の不幸を食い物にしやがって……今すぐ警察に通報してやる！」",
+  "「……寒気がしたよ。あんたの目、神を信じてる人間の目じゃない。冷たい蛇の目だ」",
+  "「危ないところだった……危うく人生をメチャクチャにされるところだったぞ！」",
+  "「こんなインチキ宗教、週刊誌と警察に全部バラしてやるからな！」",
+  "「二度と顔を見せるな！このペテン師め、今すぐパトカーを呼んでやる！」"
+];
+
+const NEWS_LIST = [
+  "【匿名掲示板】「駅前の古い聖堂、最近やたら人が出入りしてるけど何の宗教？」",
+  "【SNSの投稿】「あそこの教祖様に話を聞いてもらってから、心が嘘みたいに軽くなった」",
+  "【匿名掲示板】「姉貴があの聖堂に通い始めてから目つきがおかしい。家族のことも『悪魔』とか言い出した」",
+  "【週刊誌の見出し】『静かなる洗脳――都心の古びた聖堂に消える富裕層たちの謎』",
+  "【SNSの投稿】「全財産を寄付してきました！これでやっと救われる！ありがとう教祖様！」",
+  "【匿名掲示板】「昨日、あの聖堂から血相変えて飛び出してきた男を見たぞ。すぐにパトカーが来てた」",
+  "【ネットニュース】『「心が救われた」と語る信者続出、謎のカリスマ教祖が率いる新興団体の実態とは』",
+  "【SNSの投稿】「世間の連中は何も分かってない。目覚めた私たちだけが真実を知っている」",
+  "【匿名掲示板】「あそこの門番やってる男、元デカらしいぞ。警察が来ても笑顔で追い返してたわ」",
+  "【SNSの投稿】「もう会社も辞めたし、スマホも解約する。明日からは聖堂で教祖様にお仕えするんだ」",
+  "【匿名掲示板】「深夜にあの聖堂の前を通ったら、中から何十人もの低い詠唱が聞こえてきて鳥肌立った……」"
+];
+
+// 突発イベント8種
+const RANDOM_EVENTS = [
+  {
+    title: "【突発イベント】狂信者同士の嫉妬と密告",
+    desc: "配置中の信者が「他の信者は教祖様への信仰が足りません！私が粛清すべきです！」と血走った目で訴えてきた。",
+    choices: [
+      { text: "「よく気づいた。厳しく指導しなさい」（煽る）", run: () => { state.police = Math.min(100, state.police + 10); return "信者同士の過激なリンチが起き、近隣から通報が入った（捜査レベル+10%）。"; } },
+      { text: "「二人とも私の大切な器だ。祈りで競い合いなさい」（なだめる）", run: () => { state.police = Math.max(0, state.police - 5); return "信者たちは涙を流して和解し、聖堂の結束がさらに高まった（捜査レベル-5%）。"; } }
+    ]
+  },
+  {
+    title: "【突発イベント】家族による奪還騒動",
+    desc: "以前狂信化させた信者の家族が聖堂に怒鳴り込んできた。「うちの家族を返せ！洗脳を解け！」",
+    choices: [
+      { text: "狂信化した本人に「家族は悪魔だ」と罵倒させて追い返す", run: () => { state.police = Math.min(100, state.police + 15); return "家族は絶望してその足で警察署へ駆け込んだ（捜査レベル+15%）。"; } },
+      { text: "信者から巻き上げたお布施から大金を渡して示談にする", run: () => { return "金の力で家族を黙らせ、表沙汰になるのを防いだ（捜査レベル変動なし）。"; } }
+    ]
+  },
+  {
+    title: "【突発イベント】週刊誌記者の潜入取材",
+    desc: "相談者のふりをしてやってきた男が、胸ポケットに小型レコーダーを忍ばせていることに気づいた。",
+    choices: [
+      { text: "記者自身の「スクープへの焦りと孤独」を突き、逆に洗脳する", run: () => { state.police = Math.max(0, state.police - 15); return "記者は涙を流してレコーダーを破壊し、教団の広報係となった（捜査レベル-15%）。"; } },
+      { text: "一切ボロを出さず、ただのボランティア相談員として接して帰す", run: () => { return "記者は拍子抜けして帰っていった。無難に危機をやり過ごした。"; } }
+    ]
+  },
+  {
+    title: "【突発イベント】信者からの異常な献上品",
+    desc: "狂信者が「教祖様のために……」と、明らかに盗品と思われる高級宝石と血染めの誓約書を差し出してきた。",
+    choices: [
+      { text: "「よくやった。神はあなたの忠誠を喜んでいる」と受け取る", run: () => { state.police = Math.min(100, state.police + 10); return "信者の狂気は限界突破したが、盗品の足がつき捜査レベルが+10%上昇した。"; } },
+      { text: "「このような汚れは神の望みではない」と突き返す", run: () => { return "信者は教祖の高潔さにさらに心酔し、警察に目をつけられるリスクも回避した。"; } }
+    ]
+  },
+  {
+    title: "【突発イベント】警察の内偵・抜き打ち訪問",
+    desc: "私服警官が聖堂の入り口に立ち、「近隣から異様な声が聞こえると通報があってね」と中を覗き込んでいる。",
+    choices: [
+      { text: "聖堂の門番に対応を任せる", run: () => {
+        if (state.roles.guard) { state.police = Math.max(0, state.police - 10); return "門番が異様な迫力と巧みな話術で警官を追い返した（捜査レベル-10%）。"; }
+        else { state.police = Math.min(100, state.police + 15); return "門番が不在だったため警官に不審がられた（捜査レベル+15%）。"; }
+      }},
+      { text: "自ら穏やかな聖職者を演じきり、疑いを晴らす", run: () => { state.police = Math.min(100, state.police + 5); return "なんとか誤魔化したが、警官は鋭い目つきで聖堂を見回して去った（捜査レベル+5%）。"; } }
+    ]
+  },
+  {
+    title: "【突発イベント】裏社会からの接触",
+    desc: "黒スーツの男が現れ、「あんたのところの信者、よく働くらしいな。うちのフロント企業に紹介してくれよ」と持ちかけてきた。",
+    choices: [
+      { text: "信者を労働力として送り込み、警察への圧力をかけてもらう", run: () => { state.police = Math.max(0, state.police - 20); return "裏社会のパイプにより、警察の捜査情報が揉み消された（捜査レベル-20%）。"; } },
+      { text: "「私の羊は誰にも渡さない」と突っぱねる", run: () => { return "男は肩をすくめて去っていった。教団の純潔は保たれた。"; } }
+    ]
+  }
+];
+
+// ==========================================
+// 2. ゲーム状態管理
+// ==========================================
+let state = {
+  day: 1,
+  police: 0,
+  followers: [], // { id, job, tag, worry, weakness, quote }
+  roles: { sakura: null, guard: null, watcher: null },
+  unlockedForbidden: [], // id list
+  sacrificeCount: 0,
+  target: null,
+  waitingNext: false,
+  forbiddenUsedThisTurn: false
+};
+
+function rand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function initGame() {
+  state = {
+    day: 1,
+    police: 0,
+    followers: [],
+    roles: { sakura: null, guard: null, watcher: null },
+    unlockedForbidden: [],
+    sacrificeCount: 0,
+    target: null,
+    waitingNext: false,
+    forbiddenUsedThisTurn: false
+  };
+  nextVisitor();
+}
+
+function nextVisitor() {
+  state.waitingNext = false;
+  state.forbiddenUsedThisTurn = false;
+  const jobObj = rand(JOBS);
+  const worry = rand(WORRIES);
+  const weakness = rand(WEAKNESSES_DATA);
+  
+  // 狂信者が増えるほどロック数が2〜3個に増える
+  const lockCount = state.followers.length >= 5 ? 3 : 2;
+  const shuffledLocks = [...LOCKS_DATA].sort(() => 0.5 - Math.random());
+  const locks = shuffledLocks.slice(0, lockCount).map(l => ({ ...l, broken: false }));
+
+  // 役職ボーナス計算
+  let initSanity = 100;
+  let initFanatic = 0;
+  let revealed = false;
+  let bonusLogs = [];
+
+  if (state.roles.sakura) {
+    const isActor = state.roles.sakura.tag === "actor";
+    initSanity = isActor ? 75 : 85;
+    initFanatic = isActor ? 25 : 15;
+    bonusLogs.push(isActor
+      ? `【サクラ（${state.roles.sakura.job}）】の迫真の演技で、相談者は入るなり涙を流している！`
+      : `【サクラ】の吹き込みにより、相談者は最初から心を開いている`);
+  }
+  if (state.roles.watcher) {
+    revealed = true;
+    const isMed = state.roles.watcher.tag === "medical";
+    if (isMed) {
+      initFanatic += 10;
+      bonusLogs.push(`【監視役（${state.roles.watcher.job}）】の専門的プロファイリングで弱点と精神状態が丸裸になった！`);
+    } else {
+      bonusLogs.push(`【監視役】のメモにより、相手の隠された弱点が最初から判明している`);
+    }
+  }
+
+  state.target = {
+    job: jobObj.name,
+    tag: jobObj.tag,
+    worry, weakness, locks,
+    sanity: initSanity,
+    fanatic: initFanatic,
+    weaknessRevealed: revealed
+  };
+
+  document.getElementById("news-text").textContent = rand(NEWS_LIST);
+  document.getElementById("speaker-name").textContent = `相談者（${jobObj.name}）`;
+  document.getElementById("dialogue-text").textContent = worry;
+  document.getElementById("system-log").textContent = bonusLogs.length > 0 ? bonusLogs.join(" / ") : "【沈黙】で相手の仕草を観察するか、言葉を選んで心を揺さぶりましょう。";
+  
+  renderCommands();
+  updateUI();
+}
+
+function renderCommands() {
+  const grid = document.getElementById("command-grid");
+  grid.innerHTML = "";
+  const stageIdx = state.target.fanatic < 35 ? 0 : (state.target.fanatic < 70 ? 1 : 2);
+  
+  // 6系統からランダムに4つ抽出し、さらに各系統の3バリエーションからランダムに1フレーズ選択
+  const picks = [...COMMANDS_DATA].sort(() => 0.5 - Math.random()).slice(0, 4);
+  picks.forEach(cmd => {
+    const phraseSet = rand(cmd.variations);
+    const lineText = phraseSet[stageIdx];
+    const btn = document.createElement("button");
+    btn.className = "cmd-card";
+    btn.disabled = state.waitingNext;
+    btn.innerHTML = `
+      <div class="cmd-tag">${cmd.label}</div>
+      <div class="cmd-preview">${lineText}</div>
+    `;
+    btn.onclick = () => executeCommand(cmd, lineText);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById("observe-btn").disabled = state.waitingNext;
+  document.getElementById("forbidden-btn").disabled = state.waitingNext || state.forbiddenUsedThisTurn || state.unlockedForbidden.length === 0;
+}
+
+function doObserve() {
+  if (state.waitingNext) return;
+  const t = state.target;
+  t.weaknessRevealed = true;
+  t.sanity = Math.max(10, t.sanity - 5);
+
+  document.getElementById("speaker-name").textContent = "教祖（沈黙）";
+  document.getElementById("dialogue-text").textContent = "「……（薄暗い聖堂の中、あなたはただ静かに相手の瞳の奥を見つめ続けた）」";
+  document.getElementById("system-log").textContent = `【観察結果】${t.weakness.hint}`;
+  
+  renderCommands();
+  updateUI();
+}
+
+function breakSpecificLocks(t, lockIds) {
+  t.locks.forEach(l => {
+    if (!l.broken && lockIds.includes(l.id)) {
+      l.broken = true;
+    }
+  });
+}
+
+function executeCommand(cmd, lineText) {
+  if (state.waitingNext) return;
+  const t = state.target;
+
+  // 弱点ヒット判定
+  const isWeakHit = cmd.targetWeakness.includes(t.weakness.id);
+  const mult = isWeakHit ? 1.8 : 1.0;
+
+  let sDelta = cmd.sanityDelta;
+  if (sDelta < 0 && t.fanatic >= 50) sDelta = Math.ceil(sDelta * 0.65);
+  
+  t.sanity = Math.min(100, Math.max(0, t.sanity + sDelta));
+  t.fanatic = Math.min(100, Math.round(t.fanatic + cmd.fanaticBase * mult));
+
+  // 常識ロック破壊判定
+  let brokenMsg = "";
+  const activeLock = t.locks.find(l => !l.broken && cmd.targetLocks.includes(l.id));
+  if (activeLock && (t.fanatic >= 25 || isWeakHit)) {
+    activeLock.broken = true;
+    brokenMsg = `💥 常識【${activeLock.name}】が崩壊した！ ${activeLock.breakMsg}`;
+  } else if (t.fanatic >= 85) {
+    const remLock = t.locks.find(l => !l.broken);
+    if (remLock) {
+      remLock.broken = true;
+      brokenMsg = `💥 狂気に呑まれ【${remLock.name}】が崩壊した！ ${remLock.breakMsg}`;
+    }
+  }
+
+  document.getElementById("speaker-name").textContent = `教祖 → ${t.job}`;
+  document.getElementById("dialogue-text").textContent = lineText;
+
+  let logParts = [];
+  if (isWeakHit) logParts.push(`★弱点【${t.weakness.name}】に刺さった！（効果倍増）`);
+  if (brokenMsg) {
+    logParts.push(brokenMsg);
+  } else {
+    const stillLocked = t.locks.find(l => !l.broken);
+    if (stillLocked) logParts.push(`相手の抵抗：${stillLocked.resist}`);
+  }
+  document.getElementById("system-log").textContent = logParts.join(" / ");
+
+  checkStateAfterAction();
+}
+
+function useForbidden(fId) {
+  const f = FORBIDDEN_DATA.find(x => x.id === fId);
+  if (!f || state.forbiddenUsedThisTurn) return;
+  
+  closeModal();
+  state.forbiddenUsedThisTurn = true;
+  const t = state.target;
+  const resultLog = f.effect(t);
+
+  document.getElementById("speaker-name").textContent = `教祖【${f.name}】`;
+  document.getElementById("dialogue-text").textContent = f.line;
+  document.getElementById("system-log").textContent = `📖 ${resultLog}`;
+
+  checkStateAfterAction();
+}
+
+function checkStateAfterAction() {
+  updateUI();
+  const t = state.target;
+  const allBroken = t.locks.every(l => l.broken);
+
+  if (t.sanity <= 0) {
+    handleReport();
+  } else if (allBroken && t.fanatic >= 100) {
+    handleConvert();
+  } else {
+    renderCommands();
+  }
+}
+
+function handleReport() {
+  state.waitingNext = true;
+  renderCommands();
+  let increase = state.roles.guard ? (state.roles.guard.tag === "police" ? 10 : 18) : 30;
+  state.police = Math.min(100, state.police + increase);
+
+  document.getElementById("speaker-name").textContent = "相談者（正気に戻った！）";
+  document.getElementById("dialogue-text").textContent = rand(REPORT_LINES);
+  document.getElementById("system-log").textContent = `⚠️ 通報された！警察の捜査レベルが +${increase}% 上昇（現在 ${state.police}%）。`;
+  updateUI();
+
+  if (state.police >= 100) {
+    setTimeout(() => showEnding("arrest"), 1300);
+  } else {
+    showNextButton("次の日へ進む");
+  }
+}
+
+function handleConvert() {
+  state.waitingNext = true;
+  renderCommands();
+  const t = state.target;
+  const lastBroken = t.locks[t.locks.length - 1];
+
+  const newFollower = {
+    id: Date.now() + Math.random(),
+    job: t.job,
+    tag: t.tag,
+    worry: t.worry,
+    weakness: t.weakness.name,
+    quote: lastBroken.breakMsg
+  };
+  state.followers.push(newFollower);
+
+  // 禁断の教義アンロック判定
+  let newlyUnlocked = checkUnlocks(newFollower);
+
+  document.getElementById("speaker-name").textContent = `狂信者（元・${t.job}）`;
+  document.getElementById("dialogue-text").textContent = `${lastBroken.breakMsg}「……教祖様、どうか私に聖なるお役目をお与えください！」`;
+  
+  let logMsg = `🩸 洗脳完了！【${t.job}】が狂信者として教団に加わった。`;
+  if (newlyUnlocked.length > 0) {
+    logMsg += ` ✨ 新たな禁断の教義【${newlyUnlocked.join("・")}】を習得！`;
+  }
+  document.getElementById("system-log").textContent = logMsg;
+  updateUI();
+
+  if (state.followers.length >= 25) {
+    setTimeout(() => showEnding("true_god"), 1400);
+  } else {
+    showNextButton("次の相談者を招き入れる");
+  }
+}
+
+function checkUnlocks(f) {
+  let unlockedNames = [];
+  const addUnlock = (id) => {
+    if (!state.unlockedForbidden.includes(id)) {
+      state.unlockedForbidden.push(id);
+      const item = FORBIDDEN_DATA.find(x => x.id === id);
+      if (item) unlockedNames.push(item.name);
+    }
+  };
+
+  if (f.tag === "medical") addUnlock("stigmata");
+  if (f.tag === "rich") addUnlock("wealth");
+  if (f.tag === "police") addUnlock("erasure");
+  if (f.tag === "scholar") addUnlock("incense");
+  if (state.followers.length >= 3) addUnlock("pseudofamily");
+  if (state.followers.length >= 5) addUnlock("indulgence");
+  if (state.followers.length >= 8) addUnlock("brand");
+  if (state.roles.sakura && state.roles.guard && state.roles.watcher) addUnlock("hysteria");
+
+  return unlockedNames;
+}
+
+function showNextButton(label) {
+  const grid = document.getElementById("command-grid");
+  grid.innerHTML = `<button class="cmd-card" style="grid-column: 1 / -1; text-align:center; border-color: var(--gold); background:#1f1c29;" onclick="advanceDay()">
+    <div class="cmd-tag" style="font-size:0.95rem;">▶ ${label}</div>
+  </button>`;
+}
+
+function advanceDay() {
+  state.day++;
+  if (state.roles.guard && state.police > 0) {
+    const down = state.roles.guard.tag === "police" ? 10 : 5;
+    state.police = Math.max(0, state.police - down);
+  }
+
+  // 3日に1回、ランダム突発イベント発生
+  if (state.day % 3 === 0 && state.followers.length > 0) {
+    triggerRandomEvent();
+  } else {
+    nextVisitor();
+  }
+}
+
+function triggerRandomEvent() {
+  const ev = rand(RANDOM_EVENTS);
+  const overlay = document.getElementById("modal-overlay");
+  const content = document.getElementById("modal-content");
+  overlay.style.display = "flex";
+
+  let html = `<div class="modal-title"><span>${ev.title}</span></div>
+    <p style="line-height:1.6; font-size:0.95rem;">${ev.desc}</p>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">`;
+  
+  ev.choices.forEach((c, idx) => {
+    html += `<button class="event-choice-btn" onclick="resolveEvent(${RANDOM_EVENTS.indexOf(ev)}, ${idx})">▶ ${c.text}</button>`;
+  });
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+function resolveEvent(evIdx, choiceIdx) {
+  const ev = RANDOM_EVENTS[evIdx];
+  const resText = ev.choices[choiceIdx].run();
+  closeModal();
+  updateUI();
+
+  if (state.police >= 100) {
+    showEnding("arrest");
+  } else {
+    nextVisitor();
+    document.getElementById("system-log").textContent = `【昨夜の出来事】${resText}`;
+  }
+}
+
+function updateUI() {
+  document.getElementById("day-num").textContent = state.day;
+  document.getElementById("fanatic-count").textContent = state.followers.length;
+  document.getElementById("police-text").textContent = `${state.police}%`;
+  document.getElementById("police-fill").style.width = `${state.police}%`;
+  document.getElementById("forbidden-count").textContent = state.unlockedForbidden.length;
+
+  const pBox = document.getElementById("police-bar-box");
+  const sacBtn = document.getElementById("sacrifice-btn");
+  if (state.police >= 60) {
+    pBox.classList.add("danger-pulse");
+    sacBtn.classList.add("sacrifice-ready");
+  } else {
+    pBox.classList.remove("danger-pulse");
+    sacBtn.classList.remove("sacrifice-ready");
+  }
+
+  const t = state.target;
+  document.getElementById("target-job").textContent = t.job;
+  document.getElementById("sanity-val").textContent = `${t.sanity}%`;
+  document.getElementById("sanity-fill").style.width = `${t.sanity}%`;
+  document.getElementById("fanatic-val").textContent = `${t.fanatic}%`;
+  document.getElementById("fanatic-fill").style.width = `${t.fanatic}%`;
+  document.getElementById("target-weakness").textContent = t.weaknessRevealed ? t.weakness.name : "？？？";
+
+  // 目の色変化
+  const eyeL = document.getElementById("eye-l");
+  const eyeR = document.getElementById("eye-r");
+  eyeL.className = "eye";
+  eyeR.className = "eye";
+  if (t.fanatic >= 70) {
+    eyeL.classList.add("fanatic-high");
+    eyeR.classList.add("fanatic-high");
+  } else if (t.fanatic >= 35) {
+    eyeL.classList.add("fanatic-mid");
+    eyeR.classList.add("fanatic-mid");
+  }
+
+  // 常識ロック表示
+  const locksDiv = document.getElementById("locks-container");
+  locksDiv.innerHTML = "";
+  t.locks.forEach(l => {
+    const div = document.createElement("div");
+    div.className = `lock-item ${l.broken ? "broken" : ""}`;
+    div.textContent = l.broken ? `💥 ${l.name}（崩壊済）` : `🔒 ${l.name}`;
+    locksDiv.appendChild(div);
+  });
+
+  // 役職ボーナス表示
+  let activeRoles = [];
+  if (state.roles.sakura) activeRoles.push("サクラ");
+  if (state.roles.guard) activeRoles.push("門番");
+  if (state.roles.watcher) activeRoles.push("監視役");
+  document.getElementById("role-bonus-info").textContent = `役職: ${activeRoles.length ? activeRoles.join("・") : "なし"}`;
+}
+
+// ==========================================
+// 3. モーダル管理（役職・図鑑・禁断の教義・生贄・エンディング）
+// ==========================================
+function openModal(type) {
+  const overlay = document.getElementById("modal-overlay");
+  const content = document.getElementById("modal-content");
+  overlay.style.display = "flex";
+
+  if (type === "roles") {
+    let html = `<div class="modal-title"><span>聖堂の役職配置</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <p style="font-size:0.83rem; color:#aaa;">狂信者を配置すると面談や防衛にパッシブ効果が得られます（特定の職業なら効果倍増）。</p>`;
+    
+    const roleDefs = [
+      { key: "sakura", name: "礼拝堂のサクラ", desc: "初期警戒心-15%・狂信度+15%（俳優/モデル等は効果強化）" },
+      { key: "guard", name: "聖堂の門番", desc: "通報時の捜査上昇緩和＆毎日-5%（元刑事/議員等は効果強化）" },
+      { key: "watcher", name: "告解室の監視役", desc: "面談開始時から弱点を開示（医師/看護師等は初期狂信度+10%）" }
+    ];
+
+    roleDefs.forEach(r => {
+      const assigned = state.roles[r.key];
+      let optionsHtml = `<option value="">-- 未配置 --</option>`;
+      state.followers.forEach(f => {
+        const selected = assigned && assigned.id === f.id ? "selected" : "";
+        optionsHtml += `<option value="${f.id}" ${selected}>${f.job}（弱点:${f.weakness}）</option>`;
+      });
+
+      html += `<div class="role-slot">
+        <div class="role-slot-top">
+          <div>
+            <strong style="color:var(--gold);">${r.name}</strong><br>
+            <span style="font-size:0.78rem; color:#999;">${r.desc}</span>
+          </div>
+        </div>
+        <select class="role-select" onchange="setRole('${r.key}', this.value)">${optionsHtml}</select>
+      </div>`;
+    });
+    content.innerHTML = html;
+
+  } else if (type === "forbidden") {
+    let html = `<div class="modal-title"><span>📖 禁断の教義（1面談1回）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <p style="font-size:0.82rem; color:#aaa;">特定の職業や人数を狂信化させることで解放される強力な切り札です。</p>`;
+    
+    FORBIDDEN_DATA.forEach(f => {
+      const unlocked = state.unlockedForbidden.includes(f.id);
+      if (unlocked) {
+        html += `<div class="role-slot" style="border-color:#7c3896;">
+          <div>
+            <strong style="color:#e082ff;">${f.name}</strong><br>
+            <span style="font-size:0.8rem; color:#ddd;">${f.desc}</span>
+          </div>
+          <button class="forbidden-btn" onclick="useForbidden('${f.id}')">この教義を唱える</button>
+        </div>`;
+      } else {
+        html += `<div class="role-slot" style="opacity:0.5;">
+          <div>
+            <strong style="color:#777;">🔒 未解放の教義</strong><br>
+            <span style="font-size:0.78rem; color:#888;">解放条件: ${f.condText}</span>
+          </div>
+        </div>`;
+      }
+    });
+    content.innerHTML = html;
+
+  } else if (type === "archive") {
+    let html = `<div class="modal-title"><span>狂信者名簿（${state.followers.length}人）</span><button class="close-btn" onclick="closeModal()">✕</button></div>`;
+    if (state.followers.length === 0) {
+      html += `<p style="color:#888; font-size:0.9rem;">まだ狂信化した信者はいません。</p>`;
+    } else {
+      state.followers.forEach(f => {
+        html += `<div class="follower-list-item">
+          <strong style="color:var(--gold);">${f.job}</strong>（弱点: ${f.weakness}）<br>
+          <span style="color:#888; font-size:0.8rem;">入信前: ${f.worry}</span><br>
+          <span style="color:#ff8fa3;">狂信後: ${f.quote}</span>
+        </div>`;
+      });
+    }
+    content.innerHTML = html;
+
+  } else if (type === "sacrifice") {
+    let html = `<div class="modal-title"><span style="color:#ff6b81;">身代わりの儀式（トカゲの尻尾切り）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <p style="font-size:0.85rem; line-height:1.5;">狂信者を1人選び、すべての詐欺の罪を着せて警察に自首させます。警察捜査レベルが <strong>0%</strong> にリセットされますが、その信者は永久に失われます。</p>`;
+    
+    if (state.followers.length === 0) {
+      html += `<p style="color:#888; font-size:0.9rem;">生贄にできる狂信者がいません。</p>`;
+    } else {
+      state.followers.forEach((f, idx) => {
+        html += `<div class="role-slot">
+          <div><strong>${f.job}</strong><br><span style="font-size:0.8rem; color:#aaa;">「教祖様のためなら、喜んで鉄格子の向こうへ参ります……」</span></div>
+          <button class="nav-btn" style="border-color:var(--crimson); color:#ff6b81;" onclick="executeSacrifice(${idx})">罪を着せて自首させる</button>
+        </div>`;
+      });
+    }
+    content.innerHTML = html;
+
+  } else if (type === "retire") {
+    let html = `<div class="modal-title"><span>教団の決断（エンディング分岐）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <p style="font-size:0.85rem; line-height:1.5;">現在の教団の状況に応じて、詐欺師としての幕引きを選択できます。</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="event-choice-btn" onclick="showEnding('escape')">▶ 資産を持って海外へ高飛びする（いつでも可能）<br><span style="font-size:0.78rem; color:#999;">信者たちを置き去りにし、完璧な詐欺師として姿を消す。</span></button>
+        ${state.followers.length >= 10 ? `<button class="event-choice-btn" style="border-color:var(--gold);" onclick="showEnding('cult_city')">▶ 街全体を聖域として支配する（条件達成：狂信者10人以上）<br><span style="font-size:0.78rem; color:#c5a663;">警察も行政も信者で固め、この街の絶対的な神となる。</span></button>` : ""}
+        ${state.sacrificeCount >= 3 ? `<button class="event-choice-btn" style="border-color:#ff6b81;" onclick="showEnding('puppet_throne')">▶ 悲劇の聖職者としてメディアに君臨する（条件達成：身代わり3回以上）<br><span style="font-size:0.78rem; color:#ff8fa3;">すべての罪を幹部に着せ、世間の同情と寄付金を集める。</span></button>` : ""}
+      </div>`;
+    content.innerHTML = html;
+  }
+}
+
+function setRole(roleKey, followerIdStr) {
+  if (!followerIdStr) {
+    state.roles[roleKey] = null;
+  } else {
+    const fId = parseFloat(followerIdStr);
+    // 他の役職についていたら外す
+    for (let k in state.roles) {
+      if (state.roles[k] && state.roles[k].id === fId) state.roles[k] = null;
+    }
+    state.roles[roleKey] = state.followers.find(f => f.id === fId) || null;
+  }
+  if (state.roles.sakura && state.roles.guard && state.roles.watcher) {
+    checkUnlocks({ tag: "all_roles" });
+  }
+  updateUI();
+}
+
+function executeSacrifice(idx) {
+  const victim = state.followers.splice(idx, 1)[0];
+  for (let k in state.roles) {
+    if (state.roles[k] && state.roles[k].id === victim.id) state.roles[k] = null;
+  }
+  state.police = 0;
+  state.sacrificeCount++;
+  closeModal();
+  document.getElementById("news-text").textContent = `【週刊誌】『「すべて私がやりました」――謎の聖堂幹部（${victim.job}）が突然の自首』`;
+  document.getElementById("system-log").textContent = `🩸 ${victim.job}がすべての罪を被って自首した。警察の捜査レベルが 0% にリセットされた！`;
+  updateUI();
+}
+
+function showEnding(endType) {
+  const overlay = document.getElementById("modal-overlay");
+  const content = document.getElementById("modal-content");
+  overlay.style.display = "flex";
+
+  const endings = {
+    arrest: {
+      title: "END 1：『鉄格子の聖者』",
+      color: "#ff6b81",
+      text: "深夜、聖堂の重厚な扉が蹴破られ、あなたは詐欺の容疑で逮捕された。<br><br>しかし裁判の日、傍聴席を埋め尽くした元信者たちは、手錠をかけられたあなたを見て涙を流し祈りを捧げていた。「教祖様は私たちの罪を背負って十字架につかれたのだ」――あなたの嘘は、牢獄の中で本物の神話へと完成してしまった。"
+    },
+    escape: {
+      title: "END 2：『夜の逃亡者（完璧な詐欺師）』",
+      color: "#8bb8c4",
+      text: "聖堂が警察に踏み込まれたとき、そこには抜け殻となった狂信者たちだけが残されていた。<br><br>あなたは南の島の高級ホテルでグラスを傾けながら、ニュースで報じられる「謎の教祖失踪事件」を冷ややかに眺めている。神など最初からどこにもいなかったのだ。"
+    },
+    cult_city: {
+      title: "END 3：『街を飲み込む聖域（カルトの完成）』",
+      color: "#c5a663",
+      text: `あなたは${state.followers.length}人の人間から常識を奪い、完全なる狂信者へと作り変えた。<br><br>いつしかこの街の警察官も、議員も、医者も、あなたの聖堂の信者になっていた。もはや誰もあなたを裁くことはできない。地図から消えたこの街は、あなたの言葉ひとつで動く巨大な聖堂へと変貌した――。`
+    },
+    puppet_throne: {
+      title: "END 4：『身代わりの玉座（影の支配者）』",
+      color: "#e082ff",
+      text: `あなたは${state.sacrificeCount}人の忠実な狂信者にすべての罪を着せ、生き延びた。<br><br>メディアは「極悪非道な幹部たちに利用されていた悲劇の聖職者」としてあなたを同情的に報じた。世間の同情と莫大な寄付金を集めたあなたは、今日も無垢な笑顔で次の迷える子羊を聖堂へと招き入れる。`
+    },
+    true_god: {
+      title: "TRUE END：『ミイラ取りがミイラに（真の狂信者）』",
+      color: "#ff2a55",
+      text: "25人もの人間の魂を書き換え、奇跡を装い続けたある夜。鏡に映った自分の瞳を見た瞬間、あなたは震えながら膝をついた。<br><br>――自分がでっち上げたはずの「神」の声が、確かに頭の中で響いている。詐欺師は死に、本物の教祖が誕生した。"
+    }
+  };
+
+  const ed = endings[endType] || endings.escape;
+  content.innerHTML = `
+    <div class="modal-title"><span style="color:${ed.color};">${ed.title}</span></div>
+    <p style="line-height:1.85; font-size:0.95rem;">${ed.text}</p>
+    <div style="font-size:0.82rem; color:#888; border-top:1px solid #333; padding-top:8px;">
+      到達日数: ${state.day}日目 / 狂信者数: ${state.followers.length}人 / 身代わり回数: ${state.sacrificeCount}回 / 習得教義: ${state.unlockedForbidden.length}種
+    </div>
+    <button class="primary-btn" onclick="closeModal(); initGame();">新たな聖堂を開く（最初から）</button>
+  `;
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+}
+
+// 起動
+initGame();
+</script>
+</body>
+</html>
