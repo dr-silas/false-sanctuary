@@ -1487,7 +1487,7 @@ function executeCommand(cmd, lineText) {
   }
 
   // 3. 正常ヒット時の計算（弱点・ロックへの有効性チェック）
-  const isWeakHit = cmd.effective.includes(t.weakness.id);
+  const isWeakHit = t.weakness.effective.includes(cmd.type);
   const targetableLock = t.locks.find(l => !l.broken && l.effective.includes(cmd.type));
 
   let mult = 1.0;
