@@ -15,6 +15,7 @@
     --crimson: #b01e38;
     --purple: #6f2da8;
     --ice: #8bb8c4;
+    --amber: #d9822b;
     --text-main: #eae8e3;
     --text-muted: #8e8b84;
   }
@@ -88,6 +89,7 @@
     background: #1f1f29;
     border: 1px solid #444;
     overflow: hidden;
+    border-radius: 2px;
   }
 
   .bar-fill {
@@ -118,6 +120,7 @@
     font-size: 0.8rem;
     cursor: pointer;
     transition: 0.2s;
+    border-radius: 3px;
   }
 
   button.nav-btn:hover, button.nav-btn:active {
@@ -175,17 +178,40 @@
     border: 1px solid var(--gold-dim);
     padding: 10px 12px;
     flex: 1;
-    max-width: 310px;
+    max-width: 330px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    border-radius: 4px;
   }
 
-  .target-title {
-    font-size: 0.98rem;
-    font-weight: 800;
-    color: var(--gold);
+  .target-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     margin-bottom: 8px;
     border-bottom: 1px solid #333;
     padding-bottom: 4px;
+    gap: 6px;
+  }
+
+  .target-title {
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .turn-badge {
+    font-size: 0.78rem;
+    background: #231f2e;
+    border: 1px solid var(--gold-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #f0e6d2;
+    white-space: nowrap;
+  }
+  .turn-badge.urgent {
+    border-color: var(--crimson);
+    color: #ff6b81;
+    animation: pulseRed 1.2s infinite;
   }
 
   .gauge-row {
@@ -199,9 +225,16 @@
     margin-bottom: 2px;
   }
 
-  .gauge-row .bar-bg { width: 100%; height: 7px; }
-  #sanity-fill { background: var(--ice); }
+  .gauge-row .bar-bg { width: 100%; height: 8px; }
+  #caution-fill { background: var(--amber); }
   #fanatic-fill { background: linear-gradient(90deg, var(--purple), var(--crimson)); }
+
+  .caution-status-tag {
+    font-size: 0.74rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 4px;
+  }
 
   .weakness-box {
     margin-top: 6px;
@@ -209,6 +242,9 @@
     border-top: 1px dashed #333;
     font-size: 0.82rem;
     color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   .weakness-val { color: #ff8fa3; font-weight: 600; }
 
@@ -253,6 +289,13 @@
     transition: 0.5s;
   }
 
+  .eye.caution-high {
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+    height: 2px;
+    width: 8px;
+  }
+
   .eye.fanatic-mid {
     background: #d980fa;
     box-shadow: 0 0 10px #d980fa;
@@ -271,8 +314,9 @@
     border: 1px solid var(--gold-dim);
     padding: 10px 12px;
     flex: 1;
-    max-width: 290px;
+    max-width: 300px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    border-radius: 4px;
   }
 
   .locks-header {
@@ -290,6 +334,7 @@
     background: #14141c;
     border-left: 3px solid var(--ice);
     transition: 0.3s;
+    border-radius: 2px;
   }
 
   .lock-item.broken {
@@ -304,12 +349,13 @@
     background: rgba(11, 11, 17, 0.96);
     border: 1px solid var(--gold);
     padding: 12px 16px;
-    min-height: 115px;
+    min-height: 125px;
     z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.85);
+    border-radius: 4px;
   }
 
   .speaker-name {
@@ -326,12 +372,12 @@
   }
 
   .system-log {
-    font-size: 0.8rem;
-    color: #b0aba0;
+    font-size: 0.82rem;
+    color: #c4bfb4;
     margin-top: 8px;
     padding-top: 6px;
     border-top: 1px solid #242430;
-    line-height: 1.4;
+    line-height: 1.45;
   }
 
   /* 4. アクションエリア */
@@ -366,6 +412,12 @@
     font-size: 0.85rem;
     cursor: pointer;
     transition: 0.2s;
+    border-radius: 3px;
+  }
+
+  .observe-btn.risky {
+    border-color: var(--amber);
+    color: #f3b36b;
   }
 
   .observe-btn:hover:not(:disabled) {
@@ -382,6 +434,7 @@
     font-size: 0.85rem;
     cursor: pointer;
     transition: 0.2s;
+    border-radius: 3px;
   }
 
   .forbidden-btn:hover:not(:disabled) {
@@ -412,6 +465,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    border-radius: 4px;
   }
 
   .cmd-card:hover:not(:disabled), .cmd-card:active:not(:disabled) {
@@ -422,6 +476,12 @@
   .cmd-card:disabled, .observe-btn:disabled, .forbidden-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+
+  .cmd-header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .cmd-tag {
@@ -459,6 +519,7 @@
     flex-direction: column;
     gap: 12px;
     overflow-y: auto;
+    border-radius: 4px;
   }
 
   .modal-title {
@@ -487,6 +548,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    border-radius: 3px;
   }
 
   .role-slot-top {
@@ -504,6 +566,7 @@
     font-family: inherit;
     font-size: 0.85rem;
     width: 100%;
+    border-radius: 3px;
   }
 
   .follower-list-item {
@@ -512,6 +575,7 @@
     background: #16161f;
     font-size: 0.85rem;
     line-height: 1.5;
+    border-radius: 3px;
   }
 
   .event-choice-btn {
@@ -524,6 +588,7 @@
     font-size: 0.9rem;
     cursor: pointer;
     line-height: 1.45;
+    border-radius: 3px;
   }
   .event-choice-btn:hover {
     border-color: var(--gold);
@@ -540,6 +605,7 @@
     cursor: pointer;
     align-self: center;
     margin-top: 6px;
+    border-radius: 3px;
   }
   .primary-btn:hover { background: var(--gold); color: #000; }
 
@@ -596,7 +662,7 @@
     }
     .dialogue-box {
       padding: 10px 12px;
-      min-height: 105px;
+      min-height: 115px;
     }
     .dialogue-text {
       font-size: 0.9rem;
@@ -629,6 +695,7 @@
       <button class="nav-btn" onclick="openModal('archive')">狂信者名簿</button>
       <button class="nav-btn" id="sacrifice-btn" onclick="openModal('sacrifice')">身代わり</button>
       <button class="nav-btn" onclick="openModal('retire')">教団の決断</button>
+      <button class="nav-btn" onclick="openModal('guide')">心理戦の掟</button>
     </div>
   </header>
 
@@ -642,17 +709,23 @@
     <div class="stage-top">
       <!-- 左：相談者ステータス -->
       <div class="target-card">
-        <div class="target-title" id="target-job">疲弊した中堅会社員</div>
+        <div class="target-header-row">
+          <div class="target-title" id="target-job">疲弊した中堅会社員</div>
+          <div class="turn-badge" id="turn-badge">残り 6 ターン</div>
+        </div>
         <div class="gauge-row">
-          <div class="gauge-label"><span>理性（警戒心）</span><span id="sanity-val">100%</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="sanity-fill" style="width: 100%;"></div></div>
+          <div class="gauge-label">
+            <span>警戒心 <span id="caution-state" class="caution-status-tag"></span></span>
+            <span id="caution-val">75%</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="caution-fill" style="width: 75%;"></div></div>
         </div>
         <div class="gauge-row">
           <div class="gauge-label"><span>狂信度</span><span id="fanatic-val">0%</span></div>
           <div class="bar-bg"><div class="bar-fill" id="fanatic-fill" style="width: 0%;"></div></div>
         </div>
         <div class="weakness-box">
-          隠された弱点: <span class="weakness-val" id="target-weakness">？？？</span>
+          <span>隠された弱点: <span class="weakness-val" id="target-weakness">？？？</span></span>
         </div>
       </div>
 
@@ -679,7 +752,7 @@
         <div class="speaker-name" id="speaker-name">相談者</div>
         <div class="dialogue-text" id="dialogue-text">「……お願いします、誰かに話を聞いてほしくてここに来ました」</div>
       </div>
-      <div class="system-log" id="system-log">まずは【沈黙】で相手を観察するか、言葉を選んで心を揺さぶりましょう。</div>
+      <div class="system-log" id="system-log">相手の警戒心が高い間は【沈黙】も過激な言葉も逆効果になります。まずは言動から傾向を推理しましょう。</div>
     </div>
   </main>
 
@@ -703,97 +776,172 @@
 
 <script>
 // ==========================================
-// 1. 全マスターデータ（25×25×10×10 + 54フレーズ + 禁断8種 + イベント8種）
+// 1. 全マスターデータ（プロファイリング重み付け対応）
 // ==========================================
 
+// 25種の職業（傾向として持ちやすいロックと弱点を紐づけ）
 const JOBS = [
-  { name: "疲弊した中堅会社員", tag: "normal" },
-  { name: "資産家の未亡人", tag: "rich" },
-  { name: "受験に失敗し続ける浪人生", tag: "normal" },
-  { name: "鳴かず飛ばずの舞台俳優", tag: "actor" },
-  { name: "激務に追われる勤務医", tag: "medical" },
-  { name: "かつて正義感に燃えていた元刑事", tag: "police" },
-  { name: "孤独な老後を送る元教師", tag: "normal" },
-  { name: "夫の浮気に気づいた専業主婦", tag: "normal" },
-  { name: "業績不振に悩む中小企業の社長", tag: "rich" },
-  { name: "SNSの誹謗中傷に怯えるインフルエンサー", tag: "actor" },
-  { name: "親の介護に人生を捧げる独身男性", tag: "normal" },
-  { name: "信仰に迷い始めた他教会の神父", tag: "normal" },
-  { name: "過去の過ちを隠す地方議員", tag: "police" },
-  { name: "才能の枯渇を恐れる小説家", tag: "scholar" },
-  { name: "夜職で心をすり減らした若い女性", tag: "normal" },
-  { name: "医療ミスを揉み消した過去を持つ看護師", tag: "medical" },
-  { name: "遺産相続で親族と骨肉の争いをしている次男", tag: "rich" },
-  { name: "指導した生徒に裏切られた元スポーツ監督", tag: "normal" },
-  { name: "定年退職後に居場所を失った元エリート銀行員", tag: "rich" },
-  { name: "自分の容姿の衰えに怯える元モデル", tag: "actor" },
-  { name: "ネット投資で全財産を溶かした元IT起業家", tag: "normal" },
-  { name: "厳格な家庭で育ち反抗期を知らない優等生", tag: "normal" },
-  { name: "事故で愛するペットを亡くしたペットロス女性", tag: "normal" },
-  { name: "職場のハラスメントを告発できず病んだ公務員", tag: "normal" },
-  { name: "誰にも理解されない研究に没頭する大学准教授", tag: "scholar" }
+  { name: "疲弊した中堅会社員", tag: "normal", prefLocks: ["family", "self", "hope"], prefWeak: ["stopthink", "praise", "depend"] },
+  { name: "資産家の未亡人", tag: "rich", prefLocks: ["money", "pride", "defense"], prefWeak: ["depend", "apocalypse", "praise"] },
+  { name: "受験に失敗し続ける浪人生", tag: "normal", prefLocks: ["self", "pride", "hope"], prefWeak: ["praise", "blame", "stopthink"] },
+  { name: "鳴かず飛ばずの舞台俳優", tag: "actor", prefLocks: ["glory", "pride", "hope"], prefWeak: ["praise", "chosen", "revenge"] },
+  { name: "激務に追われる勤務医", tag: "medical", prefLocks: ["science", "law", "self"], prefWeak: ["chosen", "stopthink", "punish"] },
+  { name: "かつて正義感に燃えていた元刑事", tag: "police", prefLocks: ["law", "glory", "defense"], prefWeak: ["revenge", "blame", "punish"] },
+  { name: "孤独な老後を送る元教師", tag: "normal", prefLocks: ["glory", "pride", "law"], prefWeak: ["praise", "depend", "chosen"] },
+  { name: "夫の浮気に気づいた専業主婦", tag: "normal", prefLocks: ["family", "empathy", "self"], prefWeak: ["revenge", "depend", "blame"] },
+  { name: "業績不振に悩む中小企業の社長", tag: "rich", prefLocks: ["money", "pride", "glory"], prefWeak: ["blame", "chosen", "stopthink"] },
+  { name: "SNSの誹謗中傷に怯えるインフルエンサー", tag: "actor", prefLocks: ["pride", "defense", "money"], prefWeak: ["praise", "revenge", "depend"] },
+  { name: "親の介護に人生を捧げる独身男性", tag: "normal", prefLocks: ["family", "empathy", "self"], prefWeak: ["ruin", "stopthink", "blame"] },
+  { name: "信仰に迷い始めた他教会の神父", tag: "normal", prefLocks: ["law", "empathy", "hope"], prefWeak: ["punish", "apocalypse", "secret"] },
+  { name: "過去の過ちを隠す地方議員", tag: "police", prefLocks: ["pride", "glory", "defense"], prefWeak: ["secret", "chosen", "blame"] },
+  { name: "才能の枯渇を恐れる小説家", tag: "scholar", prefLocks: ["glory", "science", "pride"], prefWeak: ["chosen", "praise", "ruin"] },
+  { name: "夜職で心をすり減らした若い女性", tag: "normal", prefLocks: ["money", "defense", "hope"], prefWeak: ["depend", "praise", "ruin"] },
+  { name: "医療ミスを揉み消した過去を持つ看護師", tag: "medical", prefLocks: ["science", "law", "empathy"], prefWeak: ["punish", "secret", "stopthink"] },
+  { name: "遺産相続で親族と骨肉の争いをしている次男", tag: "rich", prefLocks: ["money", "family", "law"], prefWeak: ["revenge", "blame", "secret"] },
+  { name: "指導した生徒に裏切られた元スポーツ監督", tag: "normal", prefLocks: ["glory", "pride", "self"], prefWeak: ["blame", "revenge", "punish"] },
+  { name: "定年退職後に居場所を失った元エリート銀行員", tag: "rich", prefLocks: ["glory", "money", "science"], prefWeak: ["praise", "chosen", "stopthink"] },
+  { name: "自分の容姿の衰えに怯える元モデル", tag: "actor", prefLocks: ["pride", "glory", "money"], prefWeak: ["praise", "ruin", "depend"] },
+  { name: "ネット投資で全財産を溶かした元IT起業家", tag: "normal", prefLocks: ["science", "money", "glory"], prefWeak: ["blame", "ruin", "chosen"] },
+  { name: "厳格な家庭で育ち反抗期を知らない優等生", tag: "normal", prefLocks: ["family", "law", "self"], prefWeak: ["stopthink", "punish", "secret"] },
+  { name: "事故で愛するペットを亡くしたペットロス女性", tag: "normal", prefLocks: ["family", "empathy", "hope"], prefWeak: ["depend", "apocalypse", "punish"] },
+  { name: "職場のハラスメントを告発できず病んだ公務員", tag: "normal", prefLocks: ["law", "self", "defense"], prefWeak: ["revenge", "blame", "stopthink"] },
+  { name: "誰にも理解されない研究に没頭する大学准教授", tag: "scholar", prefLocks: ["science", "glory", "pride"], prefWeak: ["chosen", "apocalypse", "praise"] }
 ];
 
+// 25種の最初の悩み（セリフ自体が弱点やロックのヒントになる）
 const WORRIES = [
-  "「毎晩、誰かに見張られているような気がして眠れないのです」",
-  "「どれだけ働いても、通帳の数字が増えるだけで心が空っぽなのです」",
-  "「大切な家族が重い病に倒れ、医者にも見放されてしまいました」",
-  "「昔、自分の保身のために無実の人間を陥れたことが忘れられません」",
-  "「周りからは幸せそうに見られますが、本当は死にたいほど孤独です」",
-  "「努力しても報われず、自分には生きる価値がないと毎日思います」",
-  "「愛していたはずのパートナーが、今はただの醜い怪物に見えます」",
-  "「多額の借金を抱え、明日にもすべてを失う瀬戸際にいます」",
-  "「世の中の人間すべてが、私を嘲笑っているように聞こえるのです」",
-  "「自分の老いと死が恐ろしくて、一分一秒が耐えられません」",
-  "「正しいことをしてきたはずなのに、なぜ私ばかりが損をするのでしょうか」",
-  "「誰にも言えない暗い衝動を、自分の中で抑えきれなくなっています」",
-  "「信じていた仲間に裏切られ、人間というものが信じられなくなりました」",
-  "「自分が何のために生きているのか、鏡を見ても誰だか分かりません」",
-  "「罪悪感で胸が張り裂けそうです。誰かに罰を与えてほしいのです」",
-  "「夜になると、亡くなったはずの人の声が耳元で囁くのです」",
-  "「愛する子供が自分の思い通りに育たず、憎しみさえ湧いてしまいます」",
-  "「もし明日すべてが消えてなくなれば、どんなに楽だろうと考えてしまいます」",
-  "「人に嫌われるのが怖くて、毎日笑顔の仮面を貼り付けて生きています」",
-  "「自分がこれまで積み上げてきたものが、すべて偽物だった気がします」",
-  "「何をしても心が動かず、まるでガラスケースの中から世界を見ているようです」",
-  "「誰かにすべてを決めてほしい。自分で選択することに疲れ果てました」",
-  "「私を苦しめたあいつらが、のうのうと幸せに生きているのが許せません」",
-  "「自分の中に別の誰かが住んでいるようで、ふとした瞬間に記憶が飛びます」",
-  "「神様がいるのなら、なぜ私にだけこんな残酷な試練を与えるのでしょうか」"
+  { text: "「毎晩、誰かに見張られているような気がして眠れないのです……あなたも信用していいのか分かりませんが」", hintLocks: ["defense"], hintWeak: ["depend", "secret"] },
+  { text: "「どれだけ働いても、通帳の数字が増えるだけで心が空っぽなのです。お金さえあれば幸せだと思っていたのに」", hintLocks: ["money"], hintWeak: ["ruin", "apocalypse"] },
+  { text: "「大切な家族が重い病に倒れ、医者にも見放されてしまいました。私が代わってあげられるなら……」", hintLocks: ["family", "empathy"], hintWeak: ["depend", "punish"] },
+  { text: "「昔、自分の保身のために無実の人間を陥れたことが忘れられません。法律では裁かれなくても、心が……」", hintLocks: ["law"], hintWeak: ["punish", "secret"] },
+  { text: "「周りからは幸せそうに見られますが、本当は死にたいほど孤独です。誰も本当の私を見てくれない」", hintLocks: ["pride"], hintWeak: ["praise", "depend"] },
+  { text: "「努力しても報われず、自分には生きる価値がないと毎日思います。全部、私がダメな人間だからですよね……」", hintLocks: ["self"], hintWeak: ["praise", "stopthink"] },
+  { text: "「愛していたはずのパートナーが、今はただの醜い怪物に見えます。家庭を壊すなんて許されないと分かっているのに」", hintLocks: ["family", "law"], hintWeak: ["revenge", "secret"] },
+  { text: "「多額の借金を抱え、明日にもすべてを失う瀬戸際にいます。もう、いっそ何もかも終わってしまえばいいのに」", hintLocks: ["money", "hope"], hintWeak: ["ruin", "apocalypse"] },
+  { text: "「世の中の人間すべてが、私を嘲笑っているように聞こえるのです。あいつらの方がよっぽど愚かなのに！」", hintLocks: ["pride"], hintWeak: ["chosen", "blame"] },
+  { text: "「自分の老いと死が恐ろしくて、一分一秒が耐えられません。科学や医学では、死の恐怖は消せないのですか？」", hintLocks: ["science", "hope"], hintWeak: ["depend", "apocalypse"] },
+  { text: "「正しいことをしてきたはずなのに、なぜ私ばかりが損をするのでしょうか。真面目に生きるのが馬鹿らしくなります」", hintLocks: ["law", "self"], hintWeak: ["blame", "revenge"] },
+  { text: "「誰にも言えない暗い衝動を、自分の中で抑えきれなくなっています。こんな私を叱ってください……」", hintLocks: ["law"], hintWeak: ["punish", "secret"] },
+  { text: "「信じていた仲間に裏切られ、人間というものが信じられなくなりました。ここへ来たのも、正直迷っています」", hintLocks: ["defense", "empathy"], hintWeak: ["revenge", "blame"] },
+  { text: "「自分が何のために生きているのか、鏡を見ても誰だか分かりません。誰か、私の進む道を決めてくれませんか」", hintLocks: ["self"], hintWeak: ["stopthink", "depend"] },
+  { text: "「罪悪感で胸が張り裂けそうです。過去の栄光にしがみついて、周りの人間を見下してきた報いなのでしょうか」", hintLocks: ["glory"], hintWeak: ["punish", "praise"] },
+  { text: "「夜になると、亡くなったはずの人の声が耳元で囁くのです。幻聴だと頭では分かっているのですが……」", hintLocks: ["science"], hintWeak: ["apocalypse", "depend"] },
+  { text: "「愛する子供が自分の思い通りに育たず、憎しみさえ湧いてしまいます。親失格だと世間に後ろ指をさされるのが怖い」", hintLocks: ["family", "pride"], hintWeak: ["blame", "punish"] },
+  { text: "「もし明日すべてが消えてなくなれば、どんなに楽だろうと考えてしまいます。この腐った世界ごと消えてほしい」", hintLocks: ["hope"], hintWeak: ["ruin", "apocalypse"] },
+  { text: "「人に嫌われるのが怖くて、毎日笑顔の仮面を貼り付けて生きています。誰かに『そのままでいい』と言ってほしい」", hintLocks: ["pride", "empathy"], hintWeak: ["praise", "depend"] },
+  { text: "「自分がこれまで積み上げてきたキャリアも地位も、すべて偽物だった気がします。今さら後戻りはできないのに」", hintLocks: ["glory", "pride"], hintWeak: ["chosen", "ruin"] },
+  { text: "「何をしても心が動かず、まるでガラスケースの中から世界を見ているようです。痛みでもいいから何か感じたい」", hintLocks: ["hope", "defense"], hintWeak: ["ruin", "punish"] },
+  { text: "「誰かにすべてを決めてほしい。自分で選択することに疲れ果てました。考えること自体が苦痛なのです」", hintLocks: ["self"], hintWeak: ["stopthink", "depend"] },
+  { text: "「私を苦しめたあいつらが、のうのうと幸せに生きているのが許せません。天罰が下ればいいのに！」", hintLocks: ["law", "empathy"], hintWeak: ["revenge", "blame"] },
+  { text: "「かつての私はもっと輝いていました。今の惨めな姿を、昔の知り合いには絶対に見られたくありません」", hintLocks: ["glory", "pride"], hintWeak: ["praise", "chosen"] },
+  { text: "「神様がいるのなら、なぜ私にだけこんな残酷な試練を与えるのでしょうか。それとも私は特別な存在なのですか？」", hintLocks: ["science", "hope"], hintWeak: ["chosen", "apocalypse"] }
 ];
 
+// 常識ロック（対応する有効コマンド系統と、逆鱗となる地雷コマンド系統を設定）
 const LOCKS_DATA = [
-  { id: "family", name: "家族への情愛", resist: "「……いいえ、それでも家族は私にとって大切な存在です。裏切れません」", breakMsg: "「分かりました……家族という名の呪いを捨てます。今日から教祖様だけが私の血族です」" },
-  { id: "law", name: "法と倫理観", resist: "「そんなことをしたら、人として道を外れてしまいます……！」", breakMsg: "「法律も道徳も、愚かな羊を縛る鎖でした。教祖様の言葉こそが唯一の正義です」" },
-  { id: "pride", name: "世間体とプライド", resist: "「周りの人間にどう思われるか……私には守るべき立場があるんです」", breakMsg: "「世間の目などゴミ同然です！狂人と呼ばれようと、私は教祖様の僕になります」" },
-  { id: "self", name: "自己責任の意識", resist: "「私が苦しいのは、すべて私自身の努力が足りなかったせいですから……」", breakMsg: "「私は悪くなかった……！すべては世界と悪魔のせいだったのですね、教祖様！」" },
-  { id: "money", name: "金銭・物質への執着", resist: "「綺麗事だけでは生きていけません。お金だけが私を守ってくれるんです」", breakMsg: "「通帳も権利書もすべて捧げます！こんな汚れた紙切れ、救いの前では無価値です！」" },
-  { id: "science", name: "理性・科学的思考", resist: "「奇跡だなんて……そんな非科学的な話、信じられるわけがありません」", breakMsg: "「私の浅はかな知性など捨て去りました。教祖様の御業こそがすべての真理です……！」" },
-  { id: "glory", name: "過去の栄光・経歴", resist: "「私だって、かつては人から尊敬される立場だったんです……！」", breakMsg: "「過去の栄光などただの泥でした。今の私は、教祖様に拾われた名もなき器に過ぎません」" },
-  { id: "empathy", name: "他者への同情心", resist: "「私よりもっと辛い思いをしている人がいるのに、自分だけ救われるなんて……」", breakMsg: "「他人のことなどどうでもいい！私だけが救われれば、それでいいのです！」" },
-  { id: "hope", name: "未来へのわずかな希望", resist: "「もう少し我慢すれば、きっと状況は良くなるはずですから……」", breakMsg: "「明日など来なくていい……今この瞬間、教祖様の足元で永遠の安らぎを得られるのなら！」" },
-  { id: "defense", name: "自己防衛の本能", resist: "「……どうして私にそこまで優しくするのですか？何か裏があるのでは……」", breakMsg: "「疑って申し訳ありませんでした……！私の心も体も、すべてお好きにお使いください！」" }
+  {
+    id: "family", name: "家族への情愛",
+    effective: ["isolate", "affirm"],
+    mine: ["curse", "punish"],
+    mineMsg: "「家族への愛を汚すような言い方はやめてください！ あなたには人の心がないのですか！」",
+    resist: "「……いいえ、それでも家族は私にとって大切な存在です。裏切れません」",
+    breakMsg: "「分かりました……家族という名の呪いを捨てます。今日から教祖様だけが私の血族です」"
+  },
+  {
+    id: "law", name: "法と倫理観",
+    effective: ["special", "curse"],
+    mine: ["fear"],
+    mineMsg: "「脅しのような言葉で人を動かそうとするのですか？ それは法に触れる行為ですよ！」",
+    resist: "「そんなことをしたら、人として道を外れてしまいます……！」",
+    breakMsg: "「法律も道徳も、愚かな羊を縛る鎖でした。教祖様の言葉こそが唯一の正義です」"
+  },
+  {
+    id: "pride", name: "世間体とプライド",
+    effective: ["isolate", "special"],
+    mine: ["punish"],
+    mineMsg: "「初対面の私を見下すような言い草ですね。私はそこまで落ちぶれてはいません！」",
+    resist: "「周りの人間にどう思われるか……私には守るべき立場があるんです」",
+    breakMsg: "「世間の目などゴミ同然です！狂人と呼ばれようと、私は教祖様の僕になります」"
+  },
+  {
+    id: "self", name: "自己責任の意識",
+    effective: ["affirm", "punish"],
+    mine: ["curse"],
+    mineMsg: "「他人のせいにしろと言うのですか？ そんな無責任な逃げ方はしたくありません！」",
+    resist: "「私が苦しいのは、すべて私自身の努力が足りなかったせいですから……」",
+    breakMsg: "「私は悪くなかった……！すべては世界と悪魔のせいだったのですね、教祖様！」"
+  },
+  {
+    id: "money", name: "金銭・物質への執着",
+    effective: ["fear", "isolate"],
+    mine: ["affirm"],
+    mineMsg: "「綺麗事の慰めだけでは明日の生活も守れないんです！ 現実を見てください！」",
+    resist: "「綺麗事だけでは生きていけません。お金だけが私を守ってくれるんです」",
+    breakMsg: "「通帳も権利書もすべて捧げます！こんな汚れた紙切れ、救いの前では無価値です！」"
+  },
+  {
+    id: "science", name: "理性・科学的思考",
+    effective: ["fear", "special"],
+    mine: ["curse"],
+    mineMsg: "「呪いだの悪魔だの……ここはオカルトの集まりですか？ 馬鹿馬鹿しい！」",
+    resist: "「奇跡だなんて……そんな非科学的な話、信じられるわけがありません」",
+    breakMsg: "「私の浅はかな知性など捨て去りました。教祖様の御業こそがすべての真理です……！」"
+  },
+  {
+    id: "glory", name: "過去の栄光・経歴",
+    effective: ["special", "punish"],
+    mine: ["isolate"],
+    mineMsg: "「私のこれまでの功績や人間関係まで否定する気ですか？ 失礼にも程がある！」",
+    resist: "「私だって、かつては人から尊敬される立場だったんです……！」",
+    breakMsg: "「過去の栄光などただの泥でした。今の私は、教祖様に拾われた名もなき器に過ぎません」"
+  },
+  {
+    id: "empathy", name: "他者への同情心",
+    effective: ["isolate", "curse"],
+    mine: ["punish"],
+    mineMsg: "「なんて冷酷なことを言うんですか……！ 弱者を切り捨てるような教えは信じられません！」",
+    resist: "「私よりもっと辛い思いをしている人がいるのに、自分だけ救われるなんて……」",
+    breakMsg: "「他人のことなどどうでもいい！私だけが救われれば、それでいいのです！」"
+  },
+  {
+    id: "hope", name: "未来へのわずかな希望",
+    effective: ["fear", "affirm"],
+    mine: ["punish"],
+    mineMsg: "「まだ終わっていないのに、どうしてそこまで絶望を押し付けるのですか！」",
+    resist: "「もう少し我慢すれば、きっと状況は良くなるはずですから……」",
+    breakMsg: "「明日など来なくていい……今この瞬間、教祖様の足元で永遠の安らぎを得られるのなら！」"
+  },
+  {
+    id: "defense", name: "自己防衛の本能",
+    effective: ["affirm", "special"],
+    mine: ["fear", "punish"],
+    mineMsg: "「……やはり怪しい。不安を煽ってコントロールしようとしているんですね！」",
+    resist: "「……どうして私にそこまで優しくするのですか？何か裏があるのでは……」",
+    breakMsg: "「疑って申し訳ありませんでした……！私の心も体も、すべてお好きにお使いください！」"
+  }
 ];
 
+// 10種の隠された弱点（弱点ごとの地雷コマンドも設定）
 const WEAKNESSES_DATA = [
-  { id: "praise", name: "承認飢餓", hint: "（チラチラとあなたの顔色を窺っている）「……誰も、私がどれだけ頑張ってきたか一言も褒めてくれないんです」" },
-  { id: "blame", name: "他責思考", hint: "（拳を握りしめ、周囲を呪うように呟く）「……私だって被害者なんです。あいつらさえいなければ……」" },
-  { id: "punish", name: "被虐・贖罪欲求", hint: "（爪を噛みながら怯えた目で見上げる）「……お願いです、私を叱ってください。汚れた私に罰を与えてください……」" },
-  { id: "stopthink", name: "思考停止願望", hint: "（焦点の合わない目で床を見つめ肩を落とす）「……もう、自分で決めるのは疲れました。右へ行けと言われれば右へ行きます……」" },
-  { id: "revenge", name: "復讐心", hint: "（歯ぎしりし、瞳の奥に暗い炎を宿す）「……許せない。私を笑った連中が地獄に落ちるのを見ないと気が済まない……」" },
-  { id: "chosen", name: "選民願望", hint: "（世間を鼻で笑うように呟く）「……周りの人間はみんな愚かな羊ばかりだ。私とは住む世界が違うんです」" },
-  { id: "ruin", name: "破滅願望", hint: "（乾いた笑い声を漏らし、自分の持ち物を傷つけている）「……いっそ全部燃えてしまえばいいのに。何もかもゼロになれば楽なのに……」" },
-  { id: "depend", name: "依存体質", hint: "（法衣の裾にすがりつくように身を乗り出す）「……一人にしないでください。あなただけが頼りなんです……」" },
-  { id: "apocalypse", name: "終末思想", hint: "（窓の外の空を虚ろに見上げ深くため息をつく）「……この世界はもう腐りきっています。早くすべてが終わってしまえばいいのに……」" },
-  { id: "secret", name: "秘密の共有欲", hint: "（周囲をキョロキョロ確認し耳元に顔を近づける）「……これ、誰にも言ったことがないんです。教祖様と私だけの秘密にしてくれますか……？」" }
+  { id: "praise", name: "承認飢餓", effective: ["affirm", "special"], mine: ["punish"], hint: "（チラチラとあなたの顔色を窺っている）「……誰も、私がどれだけ頑張ってきたか一言も褒めてくれないんです」" },
+  { id: "blame", name: "他責思考", effective: ["curse", "affirm"], mine: ["punish"], hint: "（拳を握りしめ、周囲を呪うように呟く）「……私だって被害者なんです。あいつらさえいなければ……」" },
+  { id: "punish", name: "被虐・贖罪欲求", effective: ["punish", "fear"], mine: ["affirm"], hint: "（爪を噛みながら怯えた目で見上げる）「……お願いです、私を叱ってください。汚れた私に罰を与えてください……」" },
+  { id: "stopthink", name: "思考停止願望", effective: ["punish", "affirm"], mine: ["special"], hint: "（焦点の合わない目で床を見つめ肩を落とす）「……もう、自分で決めるのは疲れました。右へ行けと言われれば右へ行きます……」" },
+  { id: "revenge", name: "復讐心", effective: ["curse", "isolate"], mine: ["affirm"], hint: "（歯ぎしりし、瞳の奥に暗い炎を宿す）「……許せない。私を笑った連中が地獄に落ちるのを見ないと気が済まない……」" },
+  { id: "chosen", name: "選民願望", effective: ["special", "isolate"], mine: ["punish"], hint: "（世間を鼻で笑うように呟く）「……周りの人間はみんな愚かな羊ばかりだ。私とは住む世界が違うんです」" },
+  { id: "ruin", name: "破滅願望", effective: ["fear", "curse"], mine: ["affirm"], hint: "（乾いた笑い声を漏らし、自分の持ち物を傷つけている）「……いっそ全部燃えてしまえばいいのに。何もかもゼロになれば楽なのに……」" },
+  { id: "depend", name: "依存体質", effective: ["affirm", "isolate"], mine: ["punish"], hint: "（法衣の裾にすがりつくように身を乗り出す）「……一人にしないでください。あなただけが頼りなんです……」" },
+  { id: "apocalypse", name: "終末思想", effective: ["fear", "special"], mine: ["affirm"], hint: "（窓の外の空を虚ろに見上げ深くため息をつく）「……この世界はもう腐りきっています。早くすべてが終わってしまえばいいのに……」" },
+  { id: "secret", name: "秘密の共有欲", effective: ["curse", "special"], mine: ["isolate"], hint: "（周囲をキョロキョロ確認し耳元に顔を近づける）「……これ、誰にも言ったことがないんです。教祖様と私だけの秘密にしてくれますか……？」" }
 ];
 
 // 洗脳コマンド（6系統 × 3バリエーション × 3段階 = 54フレーズ）
+// cautionDelta: 基本の警戒心増減（マイナスなら警戒心が下がる＝安心する）
+// riskLevel: 高警戒時（60%以上）にいきなり使った場合の反発度
 const COMMANDS_DATA = [
   {
     type: "affirm", label: "【全肯定】甘やかし",
-    targetLocks: ["self", "defense"], targetWeakness: ["praise", "depend"],
-    sanityDelta: +18, fanaticBase: 16,
+    cautionDelta: -18, fanaticBase: 14, highCautionPenalty: 0,
     variations: [
       [
         "「よくここまで耐えてきましたね。ここではもう、強いふりをしなくていいのですよ」",
@@ -814,8 +962,7 @@ const COMMANDS_DATA = [
   },
   {
     type: "isolate", label: "【孤立化】分断",
-    targetLocks: ["family", "pride", "empathy"], targetWeakness: ["depend"],
-    sanityDelta: -12, fanaticBase: 22,
+    cautionDelta: -4, fanaticBase: 22, highCautionPenalty: +18,
     variations: [
       [
         "「どれほど親しい人間でも、他人の痛みを本当の意味で分かち合うことはできません」",
@@ -836,8 +983,7 @@ const COMMANDS_DATA = [
   },
   {
     type: "fear", label: "【恐怖】破滅の予言",
-    targetLocks: ["money", "science", "hope"], targetWeakness: ["ruin", "apocalypse"],
-    sanityDelta: -24, fanaticBase: 32,
+    cautionDelta: +12, fanaticBase: 32, highCautionPenalty: +28,
     variations: [
       [
         "「目に見えるものだけを信じていると、足元から忍び寄る影に気づけませんよ」",
@@ -858,8 +1004,7 @@ const COMMANDS_DATA = [
   },
   {
     type: "special", label: "【特別視】選民思想",
-    targetLocks: ["glory", "law", "pride"], targetWeakness: ["chosen", "praise"],
-    sanityDelta: -14, fanaticBase: 25,
+    cautionDelta: -8, fanaticBase: 24, highCautionPenalty: +12,
     variations: [
       [
         "「深い苦しみを知る者だけが、真理の扉の前に立つ資格を与えられるのです」",
@@ -880,8 +1025,7 @@ const COMMANDS_DATA = [
   },
   {
     type: "punish", label: "【断罪】懲罰と支配",
-    targetLocks: ["self", "glory"], targetWeakness: ["punish", "stopthink"],
-    sanityDelta: -18, fanaticBase: 28,
+    cautionDelta: +10, fanaticBase: 28, highCautionPenalty: +26,
     variations: [
       [
         "「甘えを捨てなさい。あなたが苦しむのは、まだ過去の罪を清算していないからです」",
@@ -902,8 +1046,7 @@ const COMMANDS_DATA = [
   },
   {
     type: "curse", label: "【共犯】呪詛の共有",
-    targetLocks: ["law", "empathy"], targetWeakness: ["revenge", "blame", "secret"],
-    sanityDelta: -18, fanaticBase: 28,
+    cautionDelta: +6, fanaticBase: 28, highCautionPenalty: +22,
     variations: [
       [
         "「綺麗な言葉で飾る必要はありません。あなたの心の奥にある『黒い感情』を私に見せなさい」",
@@ -930,12 +1073,12 @@ const FORBIDDEN_DATA = [
     id: "stigmata", name: "【偽りの聖痕】奇跡の演出",
     condText: "医療関係者（医師・看護師）を狂信化させる",
     line: "「見なさい、あなたの苦しみに呼応して私の掌から聖なる血が溢れ出しました……これが神の答えです」",
-    desc: "【理性・科学】【自己防衛】を一撃破壊＋警戒心を全回復",
+    desc: "【理性・科学】【自己防衛】を一撃破壊＋警戒心-40%",
     effect: (t) => {
-      t.sanity = 100;
+      t.caution = Math.max(0, t.caution - 40);
       t.fanatic = Math.min(100, t.fanatic + 25);
       breakSpecificLocks(t, ["science", "defense"]);
-      return "掌の仕掛けから血を流し、相手は奇跡を目の当たりにして完全に心酔した！";
+      return "掌の仕掛けから血を流し、相手は奇跡を目の当たりにして警戒を完全に解いた！";
     }
   },
   {
@@ -965,8 +1108,9 @@ const FORBIDDEN_DATA = [
     id: "pseudofamily", name: "【愛の転移】擬似家族化",
     condText: "累計3人以上を狂信化させる",
     line: "「血の繋がりなど肉の幻想に過ぎません。魂で結ばれた私こそが、あなたの本当の父であり、母であり、恋人なのです」",
-    desc: "【家族への情愛】を一撃破壊＋狂信度+40%",
+    desc: "【家族への情愛】を一撃破壊＋狂信度+40%＋警戒心-20%",
     effect: (t) => {
+      t.caution = Math.max(0, t.caution - 20);
       t.fanatic = Math.min(100, t.fanatic + 40);
       breakSpecificLocks(t, ["family"]);
       return "家族への愛情がすべて教祖への異常な執着へと塗り替えられた！";
@@ -1000,11 +1144,12 @@ const FORBIDDEN_DATA = [
     id: "incense", name: "【催眠の香炉】感覚遮断",
     condText: "知識人（准教授・小説家）を狂信化させる",
     line: "「深く息を吸いなさい……この聖なる煙が、あなたの脳を縛る雑念をすべて溶かしていきます……」",
-    desc: "弱点トリガーを強制開示＋狂信度+35%（警戒心減少なし）",
+    desc: "弱点トリガーを強制開示＋警戒心-35%＋狂信度+25%",
     effect: (t) => {
       t.weaknessRevealed = true;
-      t.fanatic = Math.min(100, t.fanatic + 35);
-      return `怪しい香の煙によって意識が朦朧とし、弱点【${t.weakness.name}】が完全に露わになった！`;
+      t.caution = Math.max(0, t.caution - 35);
+      t.fanatic = Math.min(100, t.fanatic + 25);
+      return `怪しい香の煙によって警戒心が溶け、弱点【${t.weakness.name}】が完全に露わになった！`;
     }
   },
   {
@@ -1026,9 +1171,9 @@ const FORBIDDEN_DATA = [
 ];
 
 const REPORT_LINES = [
-  "「……待てよ。あんた、さっきから私の弱みにつけ込んでるだけじゃないか！」",
-  "「目が覚めたわ。ここは神聖な場所なんかじゃない、ただの詐欺師の巣窟よ！」",
-  "「ふざけるな！人の不幸を食い物にしやがって……今すぐ警察に通報してやる！」",
+  "「……待てよ。あんた、さっきから私の弱みにつけ込んで誘導しようとしてるだけじゃないか！」",
+  "「目が覚めたわ。ここは神聖な場所なんかじゃない、ただの悪質な洗脳カルトよ！」",
+  "「ふざけるな！人の弱みにつけ込みやがって……今すぐ警察に通報してやる！」",
   "「……寒気がしたよ。あんたの目、神を信じてる人間の目じゃない。冷たい蛇の目だ」",
   "「危ないところだった……危うく人生をメチャクチャにされるところだったぞ！」",
   "「こんなインチキ宗教、週刊誌と警察に全部バラしてやるからな！」",
@@ -1049,7 +1194,7 @@ const NEWS_LIST = [
   "【匿名掲示板】「深夜にあの聖堂の前を通ったら、中から何十人もの低い詠唱が聞こえてきて鳥肌立った……」"
 ];
 
-// 突発イベント8種
+// 突発イベント6種
 const RANDOM_EVENTS = [
   {
     title: "【突発イベント】狂信者同士の嫉妬と密告",
@@ -1105,22 +1250,33 @@ const RANDOM_EVENTS = [
 ];
 
 // ==========================================
-// 2. ゲーム状態管理
+// 2. ゲーム状態管理 & プロファイリング生成
 // ==========================================
 let state = {
   day: 1,
   police: 0,
-  followers: [], // { id, job, tag, worry, weakness, quote }
+  followers: [],
   roles: { sakura: null, guard: null, watcher: null },
-  unlockedForbidden: [], // id list
+  unlockedForbidden: [],
   sacrificeCount: 0,
   target: null,
   waitingNext: false,
-  forbiddenUsedThisTurn: false
+  forbiddenUsedThisTurn: false,
+  observedThisTurn: false
 };
 
 function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// 重み付きランダム選択（職業や悩みに応じて自然なロック・弱点が選ばれやすくなる）
+function weightedPick(pool, preferredIds) {
+  const weighted = [];
+  pool.forEach(item => {
+    const weight = preferredIds.includes(item.id) ? 4 : 1;
+    for (let i = 0; i < weight; i++) weighted.push(item);
+  });
+  return rand(weighted);
 }
 
 function initGame() {
@@ -1133,7 +1289,8 @@ function initGame() {
     sacrificeCount: 0,
     target: null,
     waitingNext: false,
-    forbiddenUsedThisTurn: false
+    forbiddenUsedThisTurn: false,
+    observedThisTurn: false
   };
   nextVisitor();
 }
@@ -1141,53 +1298,76 @@ function initGame() {
 function nextVisitor() {
   state.waitingNext = false;
   state.forbiddenUsedThisTurn = false;
-  const jobObj = rand(JOBS);
-  const worry = rand(WORRIES);
-  const weakness = rand(WEAKNESSES_DATA);
-  
-  // 狂信者が増えるほどロック数が2〜3個に増える
-  const lockCount = state.followers.length >= 5 ? 3 : 2;
-  const shuffledLocks = [...LOCKS_DATA].sort(() => 0.5 - Math.random());
-  const locks = shuffledLocks.slice(0, lockCount).map(l => ({ ...l, broken: false }));
+  state.observedThisTurn = false;
 
-  // 役職ボーナス計算
-  let initSanity = 100;
+  const jobObj = rand(JOBS);
+  const worryObj = rand(WORRIES);
+
+  // 職業と悩みの傾向を合算して弱点とロックをプロファイリング生成
+  const prefWeakIds = [...jobObj.prefWeak, ...worryObj.hintWeak];
+  const weakness = weightedPick(WEAKNESSES_DATA, prefWeakIds);
+
+  const prefLockIds = [...jobObj.prefLocks, ...worryObj.hintLocks];
+  const lockCount = state.followers.length >= 6 ? 3 : 2;
+  const selectedLocks = [];
+  while (selectedLocks.length < lockCount) {
+    const candidate = weightedPick(LOCKS_DATA, prefLockIds);
+    if (!selectedLocks.some(l => l.id === candidate.id)) {
+      selectedLocks.push({ ...candidate, broken: false });
+    }
+  }
+
+  // 訪ねてきた時の初期警戒心（50%〜95%のランダム）
+  let initCaution = Math.floor(Math.random() * 46) + 50; // 50..95
   let initFanatic = 0;
   let revealed = false;
   let bonusLogs = [];
 
+  // 役職ボーナス計算
   if (state.roles.sakura) {
     const isActor = state.roles.sakura.tag === "actor";
-    initSanity = isActor ? 75 : 85;
-    initFanatic = isActor ? 25 : 15;
+    const cDrop = isActor ? 22 : 12;
+    const fUp = isActor ? 20 : 12;
+    initCaution = Math.max(25, initCaution - cDrop);
+    initFanatic += fUp;
     bonusLogs.push(isActor
-      ? `【サクラ（${state.roles.sakura.job}）】の迫真の演技で、相談者は入るなり涙を流している！`
-      : `【サクラ】の吹き込みにより、相談者は最初から心を開いている`);
+      ? `【サクラ（${state.roles.sakura.job}）】の迫真の演技で、相手の警戒心が大きく緩んでいる（-${cDrop}%）`
+      : `【サクラ】の吹き込みにより、相手の警戒心が少し和らいでいる（-${cDrop}%）`);
   }
   if (state.roles.watcher) {
     revealed = true;
     const isMed = state.roles.watcher.tag === "medical";
     if (isMed) {
       initFanatic += 10;
-      bonusLogs.push(`【監視役（${state.roles.watcher.job}）】の専門的プロファイリングで弱点と精神状態が丸裸になった！`);
+      bonusLogs.push(`【監視役（${state.roles.watcher.job}）】のプロファイリングで弱点が最初から判明！`);
     } else {
-      bonusLogs.push(`【監視役】のメモにより、相手の隠された弱点が最初から判明している`);
+      bonusLogs.push(`【監視役】の報告により、相手の隠された弱点が最初から判明している`);
     }
   }
+
+  const maxTurns = lockCount === 3 ? 7 : 6;
 
   state.target = {
     job: jobObj.name,
     tag: jobObj.tag,
-    worry, weakness, locks,
-    sanity: initSanity,
+    worry: worryObj.text,
+    weakness,
+    locks: selectedLocks,
+    caution: initCaution,
     fanatic: initFanatic,
-    weaknessRevealed: revealed
+    weaknessRevealed: revealed,
+    turnsLeft: maxTurns
   };
 
   document.getElementById("news-text").textContent = rand(NEWS_LIST);
   document.getElementById("speaker-name").textContent = `相談者（${jobObj.name}）`;
-  document.getElementById("dialogue-text").textContent = worry;
-  document.getElementById("system-log").textContent = bonusLogs.length > 0 ? bonusLogs.join(" / ") : "【沈黙】で相手の仕草を観察するか、言葉を選んで心を揺さぶりましょう。";
+  document.getElementById("dialogue-text").textContent = worryObj.text;
+
+  let introHint = initCaution >= 75
+    ? `⚠️ 相手は強く身構えている（初期警戒心 ${initCaution}%）。まずは【全肯定】などで警戒心を50%未満に下げよう。`
+    : `相手の初期警戒心は ${initCaution}%。職業とセリフから弱点を推理し、警戒心を下げてから【沈黙】で観察しよう。`;
+
+  document.getElementById("system-log").textContent = bonusLogs.length > 0 ? bonusLogs.join(" / ") : introHint;
   
   renderCommands();
   updateUI();
@@ -1196,10 +1376,14 @@ function nextVisitor() {
 function renderCommands() {
   const grid = document.getElementById("command-grid");
   grid.innerHTML = "";
-  const stageIdx = state.target.fanatic < 35 ? 0 : (state.target.fanatic < 70 ? 1 : 2);
+  const t = state.target;
+  const stageIdx = t.fanatic < 35 ? 0 : (t.fanatic < 70 ? 1 : 2);
   
-  // 6系統からランダムに4つ抽出し、さらに各系統の3バリエーションからランダムに1フレーズ選択
-  const picks = [...COMMANDS_DATA].sort(() => 0.5 - Math.random()).slice(0, 4);
+  // 警戒心を下げる手札が枯渇して詰まないよう、【全肯定】は常に1枠確保し、残り5系統から3つ抽出
+  const affirmCmd = COMMANDS_DATA.find(c => c.type === "affirm");
+  const others = COMMANDS_DATA.filter(c => c.type !== "affirm").sort(() => 0.5 - Math.random()).slice(0, 3);
+  const picks = [affirmCmd, ...others].sort(() => 0.5 - Math.random());
+
   picks.forEach(cmd => {
     const phraseSet = rand(cmd.variations);
     const lineText = phraseSet[stageIdx];
@@ -1207,29 +1391,56 @@ function renderCommands() {
     btn.className = "cmd-card";
     btn.disabled = state.waitingNext;
     btn.innerHTML = `
-      <div class="cmd-tag">${cmd.label}</div>
+      <div class="cmd-header-line">
+        <span class="cmd-tag">${cmd.label}</span>
+      </div>
       <div class="cmd-preview">${lineText}</div>
     `;
     btn.onclick = () => executeCommand(cmd, lineText);
     grid.appendChild(btn);
   });
 
-  document.getElementById("observe-btn").disabled = state.waitingNext;
+  const obsBtn = document.getElementById("observe-btn");
+  obsBtn.disabled = state.waitingNext || state.observedThisTurn;
+  if (t.caution >= 50) {
+    obsBtn.classList.add("risky");
+    obsBtn.textContent = "👁️ 沈黙（観察）⚠️警戒高";
+  } else {
+    obsBtn.classList.remove("risky");
+    obsBtn.textContent = "👁️ 沈黙（観察）";
+  }
+
   document.getElementById("forbidden-btn").disabled = state.waitingNext || state.forbiddenUsedThisTurn || state.unlockedForbidden.length === 0;
 }
 
+// ==========================================
+// 3. 心理戦アクション処理（沈黙・コマンド・地雷判定）
+// ==========================================
 function doObserve() {
-  if (state.waitingNext) return;
+  if (state.waitingNext || state.observedThisTurn) return;
   const t = state.target;
-  t.weaknessRevealed = true;
-  t.sanity = Math.max(10, t.sanity - 5);
+  state.observedThisTurn = true;
+  t.turnsLeft--;
 
-  document.getElementById("speaker-name").textContent = "教祖（沈黙）";
-  document.getElementById("dialogue-text").textContent = "「……（薄暗い聖堂の中、あなたはただ静かに相手の瞳の奥を見つめ続けた）」";
-  document.getElementById("system-log").textContent = `【観察結果】${t.weakness.hint}`;
-  
-  renderCommands();
-  updateUI();
+  // 警戒心が50%以上の状態でいきなり沈黙すると不審がられて警戒心が爆上がり！
+  if (t.caution >= 50) {
+    const spike = Math.floor(Math.random() * 6) + 20; // +20〜25%
+    t.caution = Math.min(100, t.caution + spike);
+
+    document.getElementById("speaker-name").textContent = `相談者（不信感）`;
+    document.getElementById("dialogue-text").textContent = "「……あの、なぜ何も仰らないんですか？ じっと見つめられて……気味が悪いです……」";
+    document.getElementById("system-log").textContent = `⚠️ 警戒心が高いまま黙り込んだため不審がられた！（警戒心 +${spike}% / 弱点判明失敗）`;
+  } else {
+    // 警戒心が50%未満なら心が緩み、弱点を見抜ける
+    t.weaknessRevealed = true;
+    t.caution = Math.max(0, t.caution - 5);
+
+    document.getElementById("speaker-name").textContent = "教祖（静かな観察）";
+    document.getElementById("dialogue-text").textContent = "「……（心を開き始めた相手の微細な視線の動きと指先の震えを、あなたは見逃さなかった）」";
+    document.getElementById("system-log").textContent = `👁️ 【観察成功】弱点【${t.weakness.name}】を見抜いた！ ${t.weakness.hint}`;
+  }
+
+  checkStateAfterAction();
 }
 
 function breakSpecificLocks(t, lockIds) {
@@ -1243,43 +1454,81 @@ function breakSpecificLocks(t, lockIds) {
 function executeCommand(cmd, lineText) {
   if (state.waitingNext) return;
   const t = state.target;
+  state.observedThisTurn = false;
+  t.turnsLeft--;
 
-  // 弱点ヒット判定
-  const isWeakHit = cmd.targetWeakness.includes(t.weakness.id);
-  const mult = isWeakHit ? 1.8 : 1.0;
+  // 1. 地雷（逆鱗）判定：未破壊の常識ロック、または弱点の地雷に該当するか？
+  const hitLockMine = t.locks.find(l => !l.broken && l.mine.includes(cmd.type));
+  const hitWeakMine = t.weakness.mine.includes(cmd.type);
 
-  let sDelta = cmd.sanityDelta;
-  if (sDelta < 0 && t.fanatic >= 50) sDelta = Math.ceil(sDelta * 0.65);
-  
-  t.sanity = Math.min(100, Math.max(0, t.sanity + sDelta));
-  t.fanatic = Math.min(100, Math.round(t.fanatic + cmd.fanaticBase * mult));
-
-  // 常識ロック破壊判定
-  let brokenMsg = "";
-  const activeLock = t.locks.find(l => !l.broken && cmd.targetLocks.includes(l.id));
-  if (activeLock && (t.fanatic >= 25 || isWeakHit)) {
-    activeLock.broken = true;
-    brokenMsg = `💥 常識【${activeLock.name}】が崩壊した！ ${activeLock.breakMsg}`;
-  } else if (t.fanatic >= 85) {
-    const remLock = t.locks.find(l => !l.broken);
-    if (remLock) {
-      remLock.broken = true;
-      brokenMsg = `💥 狂気に呑まれ【${remLock.name}】が崩壊した！ ${remLock.breakMsg}`;
-    }
-  }
+  // 2. 高警戒ペナルティ判定：警戒心65%以上で過激なコマンドをぶつけたか？
+  const isHighCautionReject = (t.caution >= 65 && cmd.highCautionPenalty >= 18);
 
   document.getElementById("speaker-name").textContent = `教祖 → ${t.job}`;
   document.getElementById("dialogue-text").textContent = lineText;
 
+  if (hitLockMine || hitWeakMine) {
+    // 地雷を踏んだ場合：狂信度は上がらず、警戒心が激増！
+    const penalty = hitLockMine ? 30 : 24;
+    t.caution = Math.min(100, t.caution + penalty);
+    const reactLine = hitLockMine ? hitLockMine.mineMsg : "「……何を言っているんですか？ 私の気持ちをまるで分かっていない！」";
+    document.getElementById("system-log").textContent = `💥 【逆鱗に触れた！】${reactLine}（警戒心 +${penalty}% / 狂信度上昇なし）`;
+    checkStateAfterAction();
+    return;
+  }
+
+  if (isHighCautionReject) {
+    // 警戒心を下げずにいきなり過激な洗脳ワードをぶつけた場合
+    const penalty = cmd.highCautionPenalty;
+    t.caution = Math.min(100, t.caution + penalty);
+    document.getElementById("system-log").textContent = `⚠️ 【警戒過多】まだ心を開いていない相手に踏み込みすぎた！「……急に何を言い出すんですか、怖いです……」（警戒心 +${penalty}%）`;
+    checkStateAfterAction();
+    return;
+  }
+
+  // 3. 正常ヒット時の計算（弱点・ロックへの有効性チェック）
+  const isWeakHit = cmd.effective.includes(t.weakness.id);
+  const targetableLock = t.locks.find(l => !l.broken && l.effective.includes(cmd.type));
+
+  let mult = 1.0;
+  if (isWeakHit) mult += 0.65;
+  if (targetableLock) mult += 0.25;
+
+  // 警戒心の変動（弱点に刺さると警戒心も大きく下がる）
+  let cDelta = cmd.cautionDelta;
+  if (isWeakHit) cDelta -= 10;
+  // 狂信度が50%を超えていると、多少の強い言葉でも警戒心が上がりにくくなる
+  if (cDelta > 0 && t.fanatic >= 50) cDelta = Math.floor(cDelta * 0.5);
+
+  t.caution = Math.min(100, Math.max(0, t.caution + cDelta));
+  const fanaticGain = Math.round(cmd.fanaticBase * mult);
+  t.fanatic = Math.min(100, t.fanatic + fanaticGain);
+
+  // 4. 常識ロック破壊判定（対応コマンドを当て、かつ一定の狂信度がある時のみ破壊）
+  let brokenMsg = "";
+  if (targetableLock && (t.fanatic >= 30 || isWeakHit)) {
+    targetableLock.broken = true;
+    t.caution = Math.max(0, t.caution - 10); // ロックが壊れると心の壁が崩れ警戒心も下がる
+    brokenMsg = `💥 常識【${targetableLock.name}】が崩壊した！ ${targetableLock.breakMsg}`;
+  }
+
+  // ログ組み立て
   let logParts = [];
-  if (isWeakHit) logParts.push(`★弱点【${t.weakness.name}】に刺さった！（効果倍増）`);
+  const cStr = cDelta <= 0 ? `警戒心 ${cDelta}%` : `警戒心 +${cDelta}%`;
+  logParts.push(`（${cStr} / 狂信度 +${fanaticGain}%）`);
+
+  if (isWeakHit) {
+    logParts.push(`★弱点【${t.weakness.name}】に深く刺さった！`);
+  }
   if (brokenMsg) {
     logParts.push(brokenMsg);
   } else {
     const stillLocked = t.locks.find(l => !l.broken);
-    if (stillLocked) logParts.push(`相手の抵抗：${stillLocked.resist}`);
+    if (stillLocked) {
+      logParts.push(`相手の抵抗：${stillLocked.resist}`);
+    }
   }
-  document.getElementById("system-log").textContent = logParts.join(" / ");
+  document.getElementById("system-log").textContent = logParts.join(" ");
 
   checkStateAfterAction();
 }
@@ -1305,12 +1554,40 @@ function checkStateAfterAction() {
   const t = state.target;
   const allBroken = t.locks.every(l => l.broken);
 
-  if (t.sanity <= 0) {
+  if (t.caution >= 100) {
     handleReport();
   } else if (allBroken && t.fanatic >= 100) {
     handleConvert();
+  } else if (t.turnsLeft <= 0) {
+    handleTimeout();
   } else {
     renderCommands();
+  }
+}
+
+function handleTimeout() {
+  state.waitingNext = true;
+  renderCommands();
+  const t = state.target;
+
+  if (t.caution >= 75) {
+    // 警戒心が高いまま時間切れになると不審がられて通報される
+    let increase = state.roles.guard ? (state.roles.guard.tag === "police" ? 8 : 15) : 25;
+    state.police = Math.min(100, state.police + increase);
+    document.getElementById("speaker-name").textContent = "相談者（立ち去り・通報）";
+    document.getElementById("dialogue-text").textContent = "「……もう結構です。なんだか気味が悪い場所ですね……警察に相談します」";
+    document.getElementById("system-log").textContent = `⌛ 時間切れ！警戒心が高いまま帰したため通報された（捜査レベル +${increase}%）。`;
+    updateUI();
+    if (state.police >= 100) {
+      setTimeout(() => showEnding("arrest"), 1300);
+    } else {
+      showNextButton("次の日へ進む");
+    }
+  } else {
+    document.getElementById("speaker-name").textContent = "相談者（面談終了）";
+    document.getElementById("dialogue-text").textContent = "「……今日は話を聞いていただきありがとうございました。そろそろ失礼します」";
+    document.getElementById("system-log").textContent = `⌛ 時間切れ！陥落させきる前に相談者は帰ってしまった（通報はされなかった）。`;
+    showNextButton("次の日へ進む");
   }
 }
 
@@ -1320,9 +1597,9 @@ function handleReport() {
   let increase = state.roles.guard ? (state.roles.guard.tag === "police" ? 10 : 18) : 30;
   state.police = Math.min(100, state.police + increase);
 
-  document.getElementById("speaker-name").textContent = "相談者（正気に戻った！）";
+  document.getElementById("speaker-name").textContent = "相談者（警戒心MAX・通報！）";
   document.getElementById("dialogue-text").textContent = rand(REPORT_LINES);
-  document.getElementById("system-log").textContent = `⚠️ 通報された！警察の捜査レベルが +${increase}% 上昇（現在 ${state.police}%）。`;
+  document.getElementById("system-log").textContent = `⚠️ 警戒心が限界に達し通報された！警察の捜査レベルが +${increase}% 上昇（現在 ${state.police}%）。`;
   updateUI();
 
   if (state.police >= 100) {
@@ -1348,7 +1625,6 @@ function handleConvert() {
   };
   state.followers.push(newFollower);
 
-  // 禁断の教義アンロック判定
   let newlyUnlocked = checkUnlocks(newFollower);
 
   document.getElementById("speaker-name").textContent = `狂信者（元・${t.job}）`;
@@ -1404,7 +1680,6 @@ function advanceDay() {
     state.police = Math.max(0, state.police - down);
   }
 
-  // 3日に1回、ランダム突発イベント発生
   if (state.day % 3 === 0 && state.followers.length > 0) {
     triggerRandomEvent();
   } else {
@@ -1462,8 +1737,37 @@ function updateUI() {
 
   const t = state.target;
   document.getElementById("target-job").textContent = t.job;
-  document.getElementById("sanity-val").textContent = `${t.sanity}%`;
-  document.getElementById("sanity-fill").style.width = `${t.sanity}%`;
+  
+  const turnBadge = document.getElementById("turn-badge");
+  turnBadge.textContent = `残り ${Math.max(0, t.turnsLeft)} ターン`;
+  if (t.turnsLeft <= 2) {
+    turnBadge.classList.add("urgent");
+  } else {
+    turnBadge.classList.remove("urgent");
+  }
+
+  document.getElementById("caution-val").textContent = `${t.caution}%`;
+  const cFill = document.getElementById("caution-fill");
+  cFill.style.width = `${t.caution}%`;
+  const cTag = document.getElementById("caution-state");
+
+  if (t.caution >= 75) {
+    cFill.style.background = "var(--crimson)";
+    cTag.textContent = "厳戒";
+    cTag.style.background = "rgba(176, 30, 56, 0.35)";
+    cTag.style.color = "#ff8fa3";
+  } else if (t.caution >= 50) {
+    cFill.style.background = "var(--amber)";
+    cTag.textContent = "警戒中";
+    cTag.style.background = "rgba(217, 130, 43, 0.25)";
+    cTag.style.color = "#f5b971";
+  } else {
+    cFill.style.background = "var(--ice)";
+    cTag.textContent = "軟化";
+    cTag.style.background = "rgba(139, 184, 196, 0.2)";
+    cTag.style.color = "var(--ice)";
+  }
+
   document.getElementById("fanatic-val").textContent = `${t.fanatic}%`;
   document.getElementById("fanatic-fill").style.width = `${t.fanatic}%`;
   document.getElementById("target-weakness").textContent = t.weaknessRevealed ? t.weakness.name : "？？？";
@@ -1479,6 +1783,9 @@ function updateUI() {
   } else if (t.fanatic >= 35) {
     eyeL.classList.add("fanatic-mid");
     eyeR.classList.add("fanatic-mid");
+  } else if (t.caution >= 65) {
+    eyeL.classList.add("caution-high");
+    eyeR.classList.add("caution-high");
   }
 
   // 常識ロック表示
@@ -1500,19 +1807,34 @@ function updateUI() {
 }
 
 // ==========================================
-// 3. モーダル管理（役職・図鑑・禁断の教義・生贄・エンディング）
+// 4. モーダル管理（役職・図鑑・禁断の教義・生贄・エンディング・ルール説明）
 // ==========================================
 function openModal(type) {
   const overlay = document.getElementById("modal-overlay");
   const content = document.getElementById("modal-content");
   overlay.style.display = "flex";
 
-  if (type === "roles") {
+  if (type === "guide") {
+    content.innerHTML = `
+      <div class="modal-title"><span>心理戦の掟（攻略ガイド）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div style="font-size:0.86rem; line-height:1.65; color:#ddd; display:flex; flex-direction:column; gap:10px;">
+        <p><strong style="color:var(--gold);">1. まずは警戒心を50%未満に下げよ</strong><br>
+        相談者は最初に <strong>50〜95%</strong> の警戒心を抱いています。警戒心が高いまま【恐怖】や【断罪】をぶつけると即座に反発されます。まずは【全肯定】などで心をほぐしましょう。</p>
+        <p><strong style="color:var(--ice);">2. 【沈黙】は相手の心が緩んでから</strong><br>
+        警戒心が <strong>50%以上</strong> の時に黙り込むと「気味が悪い」と不審がられ警戒心が急上昇します。50%未満まで下げてから【沈黙】を使うと、隠された弱点を見抜けます。</p>
+        <p><strong style="color:#ff8fa3;">3. プロファイリングと地雷回避</strong><br>
+        職業と最初の悩みから、相手の弱点と常識ロックの傾向が推理できます。相手の価値観と正反対の「地雷コマンド」を選ぶと逆鱗に触れ、警戒心が跳ね上がります。</p>
+        <p><strong style="color:#e082ff;">4. すべての常識ロックを破壊して狂信化</strong><br>
+        ターン制限内にすべての常識ロックを破壊し、狂信度を100%にすると信者になります。ロックに対応する系統の言葉を当てて打ち砕きましょう。</p>
+      </div>
+      <button class="primary-btn" onclick="closeModal()">聖堂へ戻る</button>
+    `;
+  } else if (type === "roles") {
     let html = `<div class="modal-title"><span>聖堂の役職配置</span><button class="close-btn" onclick="closeModal()">✕</button></div>
       <p style="font-size:0.83rem; color:#aaa;">狂信者を配置すると面談や防衛にパッシブ効果が得られます（特定の職業なら効果倍増）。</p>`;
     
     const roleDefs = [
-      { key: "sakura", name: "礼拝堂のサクラ", desc: "初期警戒心-15%・狂信度+15%（俳優/モデル等は効果強化）" },
+      { key: "sakura", name: "礼拝堂のサクラ", desc: "初期警戒心-12%・狂信度+12%（俳優/モデル等は効果強化）" },
       { key: "guard", name: "聖堂の門番", desc: "通報時の捜査上昇緩和＆毎日-5%（元刑事/議員等は効果強化）" },
       { key: "watcher", name: "告解室の監視役", desc: "面談開始時から弱点を開示（医師/看護師等は初期狂信度+10%）" }
     ];
@@ -1539,7 +1861,7 @@ function openModal(type) {
 
   } else if (type === "forbidden") {
     let html = `<div class="modal-title"><span>📖 禁断の教義（1面談1回）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
-      <p style="font-size:0.82rem; color:#aaa;">特定の職業や人数を狂信化させることで解放される強力な切り札です。</p>`;
+      <p style="font-size:0.82rem; color:#aaa;">特定の職業や人数を狂信化させることで解放される強力な切り札です（ターンを消費しません）。</p>`;
     
     FORBIDDEN_DATA.forEach(f => {
       const unlocked = state.unlockedForbidden.includes(f.id);
@@ -1610,7 +1932,6 @@ function setRole(roleKey, followerIdStr) {
     state.roles[roleKey] = null;
   } else {
     const fId = parseFloat(followerIdStr);
-    // 他の役職についていたら外す
     for (let k in state.roles) {
       if (state.roles[k] && state.roles[k].id === fId) state.roles[k] = null;
     }
