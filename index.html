@@ -442,6 +442,11 @@
     color: #fff;
   }
 
+  .forbidden-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   .hint-guide {
     font-size: 0.78rem;
     color: var(--text-muted);
@@ -473,7 +478,7 @@
     background: #22202d;
   }
 
-  .cmd-card:disabled, .observe-btn:disabled, .forbidden-btn:disabled {
+  .cmd-card:disabled, .observe-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
@@ -539,6 +544,23 @@
     font-size: 1.3rem;
     cursor: pointer;
     padding: 0 6px;
+  }
+
+  .guide-section {
+    background: #171722;
+    border: 1px solid #2b2b38;
+    padding: 10px 12px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .guide-sec-title {
+    font-size: 0.94rem;
+    font-weight: 800;
+    border-bottom: 1px dashed #333;
+    padding-bottom: 4px;
   }
 
   .role-slot {
@@ -936,8 +958,6 @@ const WEAKNESSES_DATA = [
 ];
 
 // 洗脳コマンド（6系統 × 3バリエーション × 3段階 = 54フレーズ）
-// cautionDelta: 基本の警戒心増減（マイナスなら警戒心が下がる＝安心する）
-// riskLevel: 高警戒時（60%以上）にいきなり使った場合の反発度
 const COMMANDS_DATA = [
   {
     type: "affirm", label: "【全肯定】甘やかし",
@@ -1071,9 +1091,10 @@ const COMMANDS_DATA = [
 const FORBIDDEN_DATA = [
   {
     id: "stigmata", name: "【偽りの聖痕】奇跡の演出",
-    condText: "医療関係者（医師・看護師）を狂信化させる",
+    condText: "医療関係者（勤務医・看護師）を狂信化させる",
     line: "「見なさい、あなたの苦しみに呼応して私の掌から聖なる血が溢れ出しました……これが神の答えです」",
     desc: "【理性・科学】【自己防衛】を一撃破壊＋警戒心-40%",
+    canUse: () => true,
     effect: (t) => {
       t.caution = Math.max(0, t.caution - 40);
       t.fanatic = Math.min(100, t.fanatic + 25);
@@ -1083,9 +1104,10 @@ const FORBIDDEN_DATA = [
   },
   {
     id: "wealth", name: "【魂の負債譲渡】全財産吸収",
-    condText: "富裕層（未亡人・社長・銀行員等）を狂信化させる",
+    condText: "富裕層（未亡人・社長・銀行員・次男）を狂信化させる",
     line: "「あなたの財産に憑りついた悪霊を私が引き受けましょう。その呪われた通帳と印鑑をここに置きなさい」",
     desc: "【金銭執着】を一撃破壊＋警察捜査レベルを15%下げる",
+    canUse: () => true,
     effect: (t) => {
       t.fanatic = Math.min(100, t.fanatic + 30);
       state.police = Math.max(0, state.police - 15);
@@ -1098,6 +1120,7 @@ const FORBIDDEN_DATA = [
     condText: "権力者（元刑事・地方議員）を狂信化させる",
     line: "「古いあなたは今この瞬間に死にました。名前も過去も捨て、私の元で新しい命として生まれ変わるのです」",
     desc: "【過去の栄光】【世間体】を一撃破壊＋狂信度+30%",
+    canUse: () => true,
     effect: (t) => {
       t.fanatic = Math.min(100, t.fanatic + 30);
       breakSpecificLocks(t, ["glory", "pride"]);
@@ -1109,6 +1132,7 @@ const FORBIDDEN_DATA = [
     condText: "累計3人以上を狂信化させる",
     line: "「血の繋がりなど肉の幻想に過ぎません。魂で結ばれた私こそが、あなたの本当の父であり、母であり、恋人なのです」",
     desc: "【家族への情愛】を一撃破壊＋狂信度+40%＋警戒心-20%",
+    canUse: () => true,
     effect: (t) => {
       t.caution = Math.max(0, t.caution - 20);
       t.fanatic = Math.min(100, t.fanatic + 40);
@@ -1121,6 +1145,7 @@ const FORBIDDEN_DATA = [
     condText: "聖堂の3つの役職すべてに信者を配置する",
     line: "「聞きなさい、外で祈る同胞たちの声を！審判の日はもう目の前まで迫っているのです！」",
     desc: "残っている常識ロックをランダムに1つ破壊＋【未来への希望】破壊",
+    canUse: () => true,
     effect: (t) => {
       t.fanatic = Math.min(100, t.fanatic + 30);
       breakSpecificLocks(t, ["hope"]);
@@ -1134,6 +1159,7 @@ const FORBIDDEN_DATA = [
     condText: "累計5人以上を狂信化させる",
     line: "「私があなたのすべての罪を許します。これからあなたが犯すどんな過ちも、神の御心として祝福されるのです」",
     desc: "【法と倫理観】【自己責任】を同時破壊＋狂信度+35%",
+    canUse: () => true,
     effect: (t) => {
       t.fanatic = Math.min(100, t.fanatic + 35);
       breakSpecificLocks(t, ["law", "self"]);
@@ -1142,9 +1168,10 @@ const FORBIDDEN_DATA = [
   },
   {
     id: "incense", name: "【催眠の香炉】感覚遮断",
-    condText: "知識人（准教授・小説家）を狂信化させる",
+    condText: "知識人（大学准教授・小説家）を狂信化させる",
     line: "「深く息を吸いなさい……この聖なる煙が、あなたの脳を縛る雑念をすべて溶かしていきます……」",
     desc: "弱点トリガーを強制開示＋警戒心-35%＋狂信度+25%",
+    canUse: () => true,
     effect: (t) => {
       t.weaknessRevealed = true;
       t.caution = Math.max(0, t.caution - 35);
@@ -1156,16 +1183,12 @@ const FORBIDDEN_DATA = [
     id: "brand", name: "【絶対服従の刻印】人格の完全破壊",
     condText: "累計8人以上を狂信化させる",
     line: "「もう言葉はいりません。私の瞳の奥を見つめなさい……あなたの魂は、最初から私の所有物だったのです」",
-    desc: "狂信度が60%以上なら残りの常識ロックをすべて無視して即座に狂信化",
+    desc: "【条件：狂信度60%以上】残りの常識ロックをすべて無視して即座に狂信化",
+    canUse: (t) => t.fanatic >= 60,
     effect: (t) => {
-      if (t.fanatic >= 60) {
-        t.locks.forEach(l => l.broken = true);
-        t.fanatic = 100;
-        return "深い暗示によって自我が完全に崩壊し、相手は人形のように頷いた！";
-      } else {
-        t.fanatic = Math.min(100, t.fanatic + 30);
-        return "まだ狂信度が足りず完全支配には至らなかったが、精神を大きく削った！";
-      }
+      t.locks.forEach(l => l.broken = true);
+      t.fanatic = 100;
+      return "深い暗示によって自我が完全に崩壊し、相手は人形のように頷いた！";
     }
   }
 ];
@@ -1269,7 +1292,6 @@ function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// 重み付きランダム選択（職業や悩みに応じて自然なロック・弱点が選ばれやすくなる）
 function weightedPick(pool, preferredIds) {
   const weighted = [];
   pool.forEach(item => {
@@ -1279,7 +1301,7 @@ function weightedPick(pool, preferredIds) {
   return rand(weighted);
 }
 
-function initGame() {
+function initGame(isFirstBoot = false) {
   state = {
     day: 1,
     police: 0,
@@ -1293,6 +1315,11 @@ function initGame() {
     observedThisTurn: false
   };
   nextVisitor();
+
+  // 初回起動時のみ説明書（心理戦の掟）を自動表示
+  if (isFirstBoot) {
+    openModal("guide");
+  }
 }
 
 function nextVisitor() {
@@ -1303,7 +1330,6 @@ function nextVisitor() {
   const jobObj = rand(JOBS);
   const worryObj = rand(WORRIES);
 
-  // 職業と悩みの傾向を合算して弱点とロックをプロファイリング生成
   const prefWeakIds = [...jobObj.prefWeak, ...worryObj.hintWeak];
   const weakness = weightedPick(WEAKNESSES_DATA, prefWeakIds);
 
@@ -1317,13 +1343,11 @@ function nextVisitor() {
     }
   }
 
-  // 訪ねてきた時の初期警戒心（50%〜95%のランダム）
   let initCaution = Math.floor(Math.random() * 46) + 50; // 50..95
   let initFanatic = 0;
   let revealed = false;
   let bonusLogs = [];
 
-  // 役職ボーナス計算
   if (state.roles.sakura) {
     const isActor = state.roles.sakura.tag === "actor";
     const cDrop = isActor ? 22 : 12;
@@ -1379,7 +1403,6 @@ function renderCommands() {
   const t = state.target;
   const stageIdx = t.fanatic < 35 ? 0 : (t.fanatic < 70 ? 1 : 2);
   
-  // 警戒心を下げる手札が枯渇して詰まないよう、【全肯定】は常に1枠確保し、残り5系統から3つ抽出
   const affirmCmd = COMMANDS_DATA.find(c => c.type === "affirm");
   const others = COMMANDS_DATA.filter(c => c.type !== "affirm").sort(() => 0.5 - Math.random()).slice(0, 3);
   const picks = [affirmCmd, ...others].sort(() => 0.5 - Math.random());
@@ -1422,7 +1445,6 @@ function doObserve() {
   state.observedThisTurn = true;
   t.turnsLeft--;
 
-  // 警戒心が50%以上の状態でいきなり沈黙すると不審がられて警戒心が爆上がり！
   if (t.caution >= 50) {
     const spike = Math.floor(Math.random() * 6) + 20; // +20〜25%
     t.caution = Math.min(100, t.caution + spike);
@@ -1431,7 +1453,6 @@ function doObserve() {
     document.getElementById("dialogue-text").textContent = "「……あの、なぜ何も仰らないんですか？ じっと見つめられて……気味が悪いです……」";
     document.getElementById("system-log").textContent = `⚠️ 警戒心が高いまま黙り込んだため不審がられた！（警戒心 +${spike}% / 弱点判明失敗）`;
   } else {
-    // 警戒心が50%未満なら心が緩み、弱点を見抜ける
     t.weaknessRevealed = true;
     t.caution = Math.max(0, t.caution - 5);
 
@@ -1457,18 +1478,14 @@ function executeCommand(cmd, lineText) {
   state.observedThisTurn = false;
   t.turnsLeft--;
 
-  // 1. 地雷（逆鱗）判定：未破壊の常識ロック、または弱点の地雷に該当するか？
   const hitLockMine = t.locks.find(l => !l.broken && l.mine.includes(cmd.type));
   const hitWeakMine = t.weakness.mine.includes(cmd.type);
-
-  // 2. 高警戒ペナルティ判定：警戒心65%以上で過激なコマンドをぶつけたか？
   const isHighCautionReject = (t.caution >= 65 && cmd.highCautionPenalty >= 18);
 
   document.getElementById("speaker-name").textContent = `教祖 → ${t.job}`;
   document.getElementById("dialogue-text").textContent = lineText;
 
   if (hitLockMine || hitWeakMine) {
-    // 地雷を踏んだ場合：狂信度は上がらず、警戒心が激増！
     const penalty = hitLockMine ? 30 : 24;
     t.caution = Math.min(100, t.caution + penalty);
     const reactLine = hitLockMine ? hitLockMine.mineMsg : "「……何を言っているんですか？ 私の気持ちをまるで分かっていない！」";
@@ -1478,7 +1495,6 @@ function executeCommand(cmd, lineText) {
   }
 
   if (isHighCautionReject) {
-    // 警戒心を下げずにいきなり過激な洗脳ワードをぶつけた場合
     const penalty = cmd.highCautionPenalty;
     t.caution = Math.min(100, t.caution + penalty);
     document.getElementById("system-log").textContent = `⚠️ 【警戒過多】まだ心を開いていない相手に踏み込みすぎた！「……急に何を言い出すんですか、怖いです……」（警戒心 +${penalty}%）`;
@@ -1486,33 +1502,32 @@ function executeCommand(cmd, lineText) {
     return;
   }
 
-  // 3. 正常ヒット時の計算（弱点・ロックへの有効性チェック）
   const isWeakHit = t.weakness.effective.includes(cmd.type);
-  const targetableLock = t.locks.find(l => !l.broken && l.effective.includes(cmd.type));
+  // 有効なロックをすべて抽出（複数同時破壊に対応）
+  const targetableLocks = t.locks.filter(l => !l.broken && l.effective.includes(cmd.type));
 
   let mult = 1.0;
   if (isWeakHit) mult += 0.65;
-  if (targetableLock) mult += 0.25;
+  if (targetableLocks.length > 0) mult += 0.25;
 
-  // 警戒心の変動（弱点に刺さると警戒心も大きく下がる）
   let cDelta = cmd.cautionDelta;
   if (isWeakHit) cDelta -= 10;
-  // 狂信度が50%を超えていると、多少の強い言葉でも警戒心が上がりにくくなる
   if (cDelta > 0 && t.fanatic >= 50) cDelta = Math.floor(cDelta * 0.5);
 
   t.caution = Math.min(100, Math.max(0, t.caution + cDelta));
   const fanaticGain = Math.round(cmd.fanaticBase * mult);
   t.fanatic = Math.min(100, t.fanatic + fanaticGain);
 
-  // 4. 常識ロック破壊判定（対応コマンドを当て、かつ一定の狂信度がある時のみ破壊）
-  let brokenMsg = "";
-  if (targetableLock && (t.fanatic >= 30 || isWeakHit)) {
-    targetableLock.broken = true;
-    t.caution = Math.max(0, t.caution - 10); // ロックが壊れると心の壁が崩れ警戒心も下がる
-    brokenMsg = `💥 常識【${targetableLock.name}】が崩壊した！ ${targetableLock.breakMsg}`;
+  // 条件を満たしていれば、対応するすべてのロックを破壊
+  let brokenMsgs = [];
+  if (targetableLocks.length > 0 && (t.fanatic >= 30 || isWeakHit)) {
+    targetableLocks.forEach(lock => {
+      lock.broken = true;
+      t.caution = Math.max(0, t.caution - 10);
+      brokenMsgs.push(`💥 常識【${lock.name}】が崩壊した！ ${lock.breakMsg}`);
+    });
   }
 
-  // ログ組み立て
   let logParts = [];
   const cStr = cDelta <= 0 ? `警戒心 ${cDelta}%` : `警戒心 +${cDelta}%`;
   logParts.push(`（${cStr} / 狂信度 +${fanaticGain}%）`);
@@ -1520,8 +1535,8 @@ function executeCommand(cmd, lineText) {
   if (isWeakHit) {
     logParts.push(`★弱点【${t.weakness.name}】に深く刺さった！`);
   }
-  if (brokenMsg) {
-    logParts.push(brokenMsg);
+  if (brokenMsgs.length > 0) {
+    logParts.push(brokenMsgs.join(" "));
   } else {
     const stillLocked = t.locks.find(l => !l.broken);
     if (stillLocked) {
@@ -1535,11 +1550,11 @@ function executeCommand(cmd, lineText) {
 
 function useForbidden(fId) {
   const f = FORBIDDEN_DATA.find(x => x.id === fId);
-  if (!f || state.forbiddenUsedThisTurn) return;
+  const t = state.target;
+  if (!f || state.forbiddenUsedThisTurn || !f.canUse(t)) return;
   
   closeModal();
   state.forbiddenUsedThisTurn = true;
-  const t = state.target;
   const resultLog = f.effect(t);
 
   document.getElementById("speaker-name").textContent = `教祖【${f.name}】`;
@@ -1571,7 +1586,6 @@ function handleTimeout() {
   const t = state.target;
 
   if (t.caution >= 75) {
-    // 警戒心が高いまま時間切れになると不審がられて通報される
     let increase = state.roles.guard ? (state.roles.guard.tag === "police" ? 8 : 15) : 25;
     state.police = Math.min(100, state.police + increase);
     document.getElementById("speaker-name").textContent = "相談者（立ち去り・通報）";
@@ -1688,6 +1702,11 @@ function advanceDay() {
 }
 
 function triggerRandomEvent() {
+  // モーダル背後の前日テキストを翌朝シーンへ切り替え
+  document.getElementById("speaker-name").textContent = `${state.day}日目・朝`;
+  document.getElementById("dialogue-text").textContent = "「……夜明けとともに、聖堂の扉が激しく叩かれた――」";
+  document.getElementById("system-log").textContent = "⚠️ 突発イベントが発生しました。対応を選択してください。";
+
   const ev = rand(RANDOM_EVENTS);
   const overlay = document.getElementById("modal-overlay");
   const content = document.getElementById("modal-content");
@@ -1772,7 +1791,6 @@ function updateUI() {
   document.getElementById("fanatic-fill").style.width = `${t.fanatic}%`;
   document.getElementById("target-weakness").textContent = t.weaknessRevealed ? t.weakness.name : "？？？";
 
-  // 目の色変化
   const eyeL = document.getElementById("eye-l");
   const eyeR = document.getElementById("eye-r");
   eyeL.className = "eye";
@@ -1788,7 +1806,6 @@ function updateUI() {
     eyeR.classList.add("caution-high");
   }
 
-  // 常識ロック表示
   const locksDiv = document.getElementById("locks-container");
   locksDiv.innerHTML = "";
   t.locks.forEach(l => {
@@ -1798,7 +1815,6 @@ function updateUI() {
     locksDiv.appendChild(div);
   });
 
-  // 役職ボーナス表示
   let activeRoles = [];
   if (state.roles.sakura) activeRoles.push("サクラ");
   if (state.roles.guard) activeRoles.push("門番");
@@ -1807,7 +1823,7 @@ function updateUI() {
 }
 
 // ==========================================
-// 4. モーダル管理（役職・図鑑・禁断の教義・生贄・エンディング・ルール説明）
+// 4. モーダル管理（役職・図鑑・禁断の教義・生贄・エンディング・取扱説明書）
 // ==========================================
 function openModal(type) {
   const overlay = document.getElementById("modal-overlay");
@@ -1816,27 +1832,51 @@ function openModal(type) {
 
   if (type === "guide") {
     content.innerHTML = `
-      <div class="modal-title"><span>心理戦の掟（攻略ガイド）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
-      <div style="font-size:0.86rem; line-height:1.65; color:#ddd; display:flex; flex-direction:column; gap:10px;">
-        <p><strong style="color:var(--gold);">1. まずは警戒心を50%未満に下げよ</strong><br>
-        相談者は最初に <strong>50〜95%</strong> の警戒心を抱いています。警戒心が高いまま【恐怖】や【断罪】をぶつけると即座に反発されます。まずは【全肯定】などで心をほぐしましょう。</p>
-        <p><strong style="color:var(--ice);">2. 【沈黙】は相手の心が緩んでから</strong><br>
-        警戒心が <strong>50%以上</strong> の時に黙り込むと「気味が悪い」と不審がられ警戒心が急上昇します。50%未満まで下げてから【沈黙】を使うと、隠された弱点を見抜けます。</p>
-        <p><strong style="color:#ff8fa3;">3. プロファイリングと地雷回避</strong><br>
-        職業と最初の悩みから、相手の弱点と常識ロックの傾向が推理できます。相手の価値観と正反対の「地雷コマンド」を選ぶと逆鱗に触れ、警戒心が跳ね上がります。</p>
-        <p><strong style="color:#e082ff;">4. すべての常識ロックを破壊して狂信化</strong><br>
-        ターン制限内にすべての常識ロックを破壊し、狂信度を100%にすると信者になります。ロックに対応する系統の言葉を当てて打ち砕きましょう。</p>
+      <div class="modal-title"><span>📖 心理戦の掟（取扱説明書）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div style="font-size:0.84rem; line-height:1.6; color:#ddd; display:flex; flex-direction:column; gap:10px;">
+        
+        <div class="guide-section">
+          <div class="guide-sec-title" style="color:var(--gold);">0. 教祖としての目的と敗北条件</div>
+          <p><strong>【勝利条件】</strong> 迷える相談者の心を操り、<strong>すべての「常識ロック」を破壊した上で「狂信度」を100%</strong>にすると狂信者として入信します。<br>
+          <strong>【敗北条件】</strong> 警戒心が <strong>100%</strong> に達するか、<strong>75%以上のままターン切れ</strong>になると通報され、上部の「捜査レベル」が上昇します。捜査が <strong>100%</strong> に達すると逮捕（ゲームオーバー）です。</p>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-sec-title" style="color:var(--ice);">1. 面談の基本ステップ（まずはこれだけ覚えよう）</div>
+          <p><strong>① 警戒心を50%未満に下げる：</strong> 相談者は最初 <strong>50〜95%</strong> の警戒心を抱いています。まずは【全肯定】などで心をほぐし、警戒心を <strong>50%未満（軟化状態）</strong> まで下げましょう。<br>
+          <strong>② 【沈黙】で弱点を見抜く：</strong> 警戒心が <strong>50%未満</strong> になってから【沈黙（観察）】を使うと、相手の「隠された弱点」が判明します。（※50%以上の時に黙り込むと不審がられ、警戒心が激増するので注意！）<br>
+          <strong>③ 弱点とロックを突いて狂信化：</strong> 判明した弱点や、相手の職業・最初の悩みから「常識ロック」に効きそうな言葉を選び、ターン内にすべてのロックを破壊して狂信度100%を目指します。</p>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-sec-title" style="color:#ff8fa3;">2. 6種類の言葉（コマンド）の性質と地雷</div>
+          <p><strong>・警戒心を下げやすい（序盤向き）：</strong><br>
+           【全肯定】警戒心を大きく下げます。迷ったらまずこれを選びましょう。<br>
+           【特別視】警戒心を少し下げつつ、選民意識をくすぐります。<br>
+           【孤立化】周囲との繋がりを断たせます（高警戒時は少し反発されます）。<br>
+          <strong>・狂信度を大きく上げるが警戒心も上がる（中盤〜終盤向き）：</strong><br>
+           【共犯】【断罪】【恐怖】相手の心を強く揺さぶり狂信度を一気に高めますが、警戒心が高いうち（65%以上）に使うと強く拒絶されます。<br>
+          <strong>・⚠️ 逆鱗（地雷）に注意：</strong> 相手の常識や弱点と正反対の言葉をぶつけると「逆鱗」に触れ、狂信度が上がらず警戒心が跳ね上がります。（例：家族想いの人に呪詛を吐く、プライドが高い人を見下す、など）</p>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-sec-title" style="color:#e082ff;">3. 聖堂の裏機能（上部メニューの使い方）</div>
+          <p><strong>・聖堂の役職：</strong> 狂信化した信者を「サクラ」「門番」「監視役」に任命できます。面談の有利化や捜査レベルの抑制など強力な効果があり、特定の職業を配置すると効果が倍増します。<br>
+          <strong>・📖 禁断の教義：</strong> 特定の職業や人数の信者を獲得すると解放される切り札です。<strong>1回の面談につき1度だけ、ターンを消費せず</strong>にロックの強制破壊や警戒心の大幅低下を行えます。<br>
+          <strong>・身代わり：</strong> 捜査レベルが危険域に達した際、狂信者1人にすべての罪を着せて自首させることで、捜査レベルを <strong>0%</strong> にリセットできます。</p>
+        </div>
+
       </div>
-      <button class="primary-btn" onclick="closeModal()">聖堂へ戻る</button>
+      <button class="primary-btn" onclick="closeModal()">理解した（聖堂へ戻る）</button>
     `;
   } else if (type === "roles") {
     let html = `<div class="modal-title"><span>聖堂の役職配置</span><button class="close-btn" onclick="closeModal()">✕</button></div>
       <p style="font-size:0.83rem; color:#aaa;">狂信者を配置すると面談や防衛にパッシブ効果が得られます（特定の職業なら効果倍増）。</p>`;
     
     const roleDefs = [
-      { key: "sakura", name: "礼拝堂のサクラ", desc: "初期警戒心-12%・狂信度+12%（俳優/モデル等は効果強化）" },
-      { key: "guard", name: "聖堂の門番", desc: "通報時の捜査上昇緩和＆毎日-5%（元刑事/議員等は効果強化）" },
-      { key: "watcher", name: "告解室の監視役", desc: "面談開始時から弱点を開示（医師/看護師等は初期狂信度+10%）" }
+      { key: "sakura", name: "礼拝堂のサクラ", desc: "初期警戒心-12%・狂信度+12%（俳優・インフルエンサー・元モデルは効果強化）" },
+      { key: "guard", name: "聖堂の門番", desc: "通報時の捜査上昇緩和＆毎日-5%（元刑事・地方議員は効果強化）" },
+      { key: "watcher", name: "告解室の監視役", desc: "面談開始時から弱点を開示（勤務医・看護師は初期狂信度+10%）" }
     ];
 
     roleDefs.forEach(r => {
@@ -1866,12 +1906,15 @@ function openModal(type) {
     FORBIDDEN_DATA.forEach(f => {
       const unlocked = state.unlockedForbidden.includes(f.id);
       if (unlocked) {
+        const executable = f.canUse(state.target);
         html += `<div class="role-slot" style="border-color:#7c3896;">
           <div>
             <strong style="color:#e082ff;">${f.name}</strong><br>
             <span style="font-size:0.8rem; color:#ddd;">${f.desc}</span>
           </div>
-          <button class="forbidden-btn" onclick="useForbidden('${f.id}')">この教義を唱える</button>
+          <button class="forbidden-btn" ${executable ? "" : "disabled"} onclick="useForbidden('${f.id}')">
+            ${executable ? "この教義を唱える" : "条件未達（狂信度60%未満）"}
+          </button>
         </div>`;
       } else {
         html += `<div class="role-slot" style="opacity:0.5;">
@@ -1938,7 +1981,10 @@ function setRole(roleKey, followerIdStr) {
     state.roles[roleKey] = state.followers.find(f => f.id === fId) || null;
   }
   if (state.roles.sakura && state.roles.guard && state.roles.watcher) {
-    checkUnlocks({ tag: "all_roles" });
+    const unlocked = checkUnlocks({ tag: "all_roles" });
+    if (unlocked.length > 0) {
+      document.getElementById("system-log").textContent = `✨ 聖堂の3役職がすべて揃ったことで、新たな禁断の教義【${unlocked.join("・")}】を習得！`;
+    }
   }
   updateUI();
 }
@@ -1996,7 +2042,7 @@ function showEnding(endType) {
     <div style="font-size:0.82rem; color:#888; border-top:1px solid #333; padding-top:8px;">
       到達日数: ${state.day}日目 / 狂信者数: ${state.followers.length}人 / 身代わり回数: ${state.sacrificeCount}回 / 習得教義: ${state.unlockedForbidden.length}種
     </div>
-    <button class="primary-btn" onclick="closeModal(); initGame();">新たな聖堂を開く（最初から）</button>
+    <button class="primary-btn" onclick="closeModal(); initGame(false);">新たな聖堂を開く（最初から）</button>
   `;
 }
 
@@ -2004,8 +2050,8 @@ function closeModal() {
   document.getElementById("modal-overlay").style.display = "none";
 }
 
-// 起動
-initGame();
+// 初回起動時は説明書を自動表示
+initGame(true);
 </script>
 </body>
 </html>
