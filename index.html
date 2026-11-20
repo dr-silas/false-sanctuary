@@ -105,6 +105,20 @@
     50% { box-shadow: 0 0 14px #ff2a55; }
   }
 
+  .save-indicator {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    border: 1px solid #2a2a36;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #13131c;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .save-indicator.saved {
+    color: var(--ice);
+    border-color: #3d5a63;
+  }
+
   .menu-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -637,11 +651,11 @@
       padding: 8px 10px;
     }
     .stats-bar {
-      gap: 10px;
+      gap: 8px;
       font-size: 0.82rem;
     }
     .bar-bg {
-      width: 65px;
+      width: 60px;
     }
     .menu-buttons {
       width: 100%;
@@ -711,6 +725,7 @@
         <div>捜査:<strong id="police-text">0%</strong></div>
         <div class="bar-bg" id="police-bar-box"><div class="bar-fill" id="police-fill"></div></div>
       </div>
+      <div class="save-indicator" id="save-indicator">記録済</div>
     </div>
     <div class="menu-buttons">
       <button class="nav-btn" onclick="openModal('roles')">聖堂の役職</button>
@@ -798,10 +813,15 @@
 
 <script>
 // ==========================================
+// 0. セーブデータ管理定数
+// ==========================================
+const STORAGE_KEY = "false_sanctuary_save_v1";
+let modalClosableByBackdrop = true;
+
+// ==========================================
 // 1. 全マスターデータ（プロファイリング重み付け対応）
 // ==========================================
 
-// 25種の職業（傾向として持ちやすいロックと弱点を紐づけ）
 const JOBS = [
   { name: "疲弊した中堅会社員", tag: "normal", prefLocks: ["family", "self", "hope"], prefWeak: ["stopthink", "praise", "depend"] },
   { name: "資産家の未亡人", tag: "rich", prefLocks: ["money", "pride", "defense"], prefWeak: ["depend", "apocalypse", "praise"] },
@@ -830,7 +850,6 @@ const JOBS = [
   { name: "誰にも理解されない研究に没頭する大学准教授", tag: "scholar", prefLocks: ["science", "glory", "pride"], prefWeak: ["chosen", "apocalypse", "praise"] }
 ];
 
-// 25種の最初の悩み（セリフ自体が弱点やロックのヒントになる）
 const WORRIES = [
   { text: "「毎晩、誰かに見張られているような気がして眠れないのです……あなたも信用していいのか分かりませんが」", hintLocks: ["defense"], hintWeak: ["depend", "secret"] },
   { text: "「どれだけ働いても、通帳の数字が増えるだけで心が空っぽなのです。お金さえあれば幸せだと思っていたのに」", hintLocks: ["money"], hintWeak: ["ruin", "apocalypse"] },
@@ -859,7 +878,6 @@ const WORRIES = [
   { text: "「神様がいるのなら、なぜ私にだけこんな残酷な試練を与えるのでしょうか。それとも私は特別な存在なのですか？」", hintLocks: ["science", "hope"], hintWeak: ["chosen", "apocalypse"] }
 ];
 
-// 常識ロック（対応する有効コマンド系統と、逆鱗となる地雷コマンド系統を設定）
 const LOCKS_DATA = [
   {
     id: "family", name: "家族への情愛",
@@ -943,7 +961,6 @@ const LOCKS_DATA = [
   }
 ];
 
-// 10種の隠された弱点（弱点ごとの地雷コマンドも設定）
 const WEAKNESSES_DATA = [
   { id: "praise", name: "承認飢餓", effective: ["affirm", "special"], mine: ["punish"], hint: "（チラチラとあなたの顔色を窺っている）「……誰も、私がどれだけ頑張ってきたか一言も褒めてくれないんです」" },
   { id: "blame", name: "他責思考", effective: ["curse", "affirm"], mine: ["punish"], hint: "（拳を握りしめ、周囲を呪うように呟く）「……私だって被害者なんです。あいつらさえいなければ……」" },
@@ -957,7 +974,6 @@ const WEAKNESSES_DATA = [
   { id: "secret", name: "秘密の共有欲", effective: ["curse", "special"], mine: ["isolate"], hint: "（周囲をキョロキョロ確認し耳元に顔を近づける）「……これ、誰にも言ったことがないんです。教祖様と私だけの秘密にしてくれますか……？」" }
 ];
 
-// 洗脳コマンド（6系統 × 3バリエーション × 3段階 = 54フレーズ）
 const COMMANDS_DATA = [
   {
     type: "affirm", label: "【全肯定】甘やかし",
@@ -1087,7 +1103,6 @@ const COMMANDS_DATA = [
   }
 ];
 
-// 禁断の教義（アンロック式特殊コマンド8種）
 const FORBIDDEN_DATA = [
   {
     id: "stigmata", name: "【偽りの聖痕】奇跡の演出",
@@ -1217,7 +1232,6 @@ const NEWS_LIST = [
   "【匿名掲示板】「深夜にあの聖堂の前を通ったら、中から何十人もの低い詠唱が聞こえてきて鳥肌立った……」"
 ];
 
-// 突発イベント6種
 const RANDOM_EVENTS = [
   {
     title: "【突発イベント】狂信者同士の嫉妬と密告",
@@ -1273,7 +1287,7 @@ const RANDOM_EVENTS = [
 ];
 
 // ==========================================
-// 2. ゲーム状態管理 & プロファイリング生成
+// 2. ゲーム状態管理 & セーブ・ロード機能
 // ==========================================
 let state = {
   day: 1,
@@ -1284,9 +1298,100 @@ let state = {
   sacrificeCount: 0,
   target: null,
   waitingNext: false,
+  nextButtonLabel: "",
   forbiddenUsedThisTurn: false,
-  observedThisTurn: false
+  observedThisTurn: false,
+  pendingEventIdx: null,
+  currentCommands: [],
+  uiSnapshot: {
+    news: "",
+    speaker: "",
+    dialogue: "",
+    log: ""
+  }
 };
+
+function saveGame() {
+  try {
+    state.uiSnapshot = {
+      news: document.getElementById("news-text").textContent,
+      speaker: document.getElementById("speaker-name").textContent,
+      dialogue: document.getElementById("dialogue-text").textContent,
+      log: document.getElementById("system-log").textContent
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const ind = document.getElementById("save-indicator");
+    if (ind) {
+      ind.textContent = "自動保存済";
+      ind.classList.add("saved");
+      setTimeout(() => ind.classList.remove("saved"), 900);
+    }
+  } catch (e) {
+    console.warn("Save failed:", e);
+  }
+}
+
+function clearSaveData() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    console.warn("Clear save failed:", e);
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const loaded = JSON.parse(raw);
+    if (!loaded || !loaded.target || !loaded.target.weakness || !Array.isArray(loaded.target.locks)) {
+      return false;
+    }
+
+    // マスターデータから関数や最新定義を再バインド（JSON化で失われる要素の補完）
+    const freshWeak = WEAKNESSES_DATA.find(w => w.id === loaded.target.weakness.id);
+    if (freshWeak) loaded.target.weakness = freshWeak;
+
+    loaded.target.locks = loaded.target.locks.map(l => {
+      const freshLock = LOCKS_DATA.find(x => x.id === l.id);
+      return freshLock ? { ...freshLock, broken: !!l.broken } : l;
+    });
+
+    // roles のオブジェクト参照を followers 内のインスタンスと同期
+    ["sakura", "guard", "watcher"].forEach(k => {
+      if (loaded.roles[k]) {
+        const match = loaded.followers.find(f => f.id === loaded.roles[k].id);
+        loaded.roles[k] = match || null;
+      }
+    });
+
+    state = loaded;
+
+    // UIテキストの復元
+    if (state.uiSnapshot) {
+      document.getElementById("news-text").textContent = state.uiSnapshot.news || rand(NEWS_LIST);
+      document.getElementById("speaker-name").textContent = state.uiSnapshot.speaker || `相談者（${state.target.job}）`;
+      document.getElementById("dialogue-text").textContent = state.uiSnapshot.dialogue || state.target.worry;
+      document.getElementById("system-log").textContent = state.uiSnapshot.log || "";
+    }
+
+    updateUI();
+
+    // 状態に応じた操作パネル・モーダルの復元
+    if (state.pendingEventIdx !== null && RANDOM_EVENTS[state.pendingEventIdx]) {
+      renderEventModal(state.pendingEventIdx);
+    } else if (state.waitingNext) {
+      showNextButton(state.nextButtonLabel || "次の日へ進む", false);
+    } else {
+      renderCommands(true);
+    }
+
+    return true;
+  } catch (e) {
+    console.warn("Load failed:", e);
+    return false;
+  }
+}
 
 function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -1302,6 +1407,11 @@ function weightedPick(pool, preferredIds) {
 }
 
 function initGame(isFirstBoot = false) {
+  if (isFirstBoot && loadGame()) {
+    return;
+  }
+
+  clearSaveData();
   state = {
     day: 1,
     police: 0,
@@ -1311,12 +1421,15 @@ function initGame(isFirstBoot = false) {
     sacrificeCount: 0,
     target: null,
     waitingNext: false,
+    nextButtonLabel: "",
     forbiddenUsedThisTurn: false,
-    observedThisTurn: false
+    observedThisTurn: false,
+    pendingEventIdx: null,
+    currentCommands: [],
+    uiSnapshot: { news: "", speaker: "", dialogue: "", log: "" }
   };
   nextVisitor();
 
-  // 初回起動時のみ説明書（心理戦の掟）を自動表示
   if (isFirstBoot) {
     openModal("guide");
   }
@@ -1324,8 +1437,11 @@ function initGame(isFirstBoot = false) {
 
 function nextVisitor() {
   state.waitingNext = false;
+  state.nextButtonLabel = "";
   state.forbiddenUsedThisTurn = false;
   state.observedThisTurn = false;
+  state.pendingEventIdx = null;
+  state.currentCommands = [];
 
   const jobObj = rand(JOBS);
   const worryObj = rand(WORRIES);
@@ -1393,23 +1509,55 @@ function nextVisitor() {
 
   document.getElementById("system-log").textContent = bonusLogs.length > 0 ? bonusLogs.join(" / ") : introHint;
   
-  renderCommands();
+  renderCommands(false);
   updateUI();
+  saveGame();
 }
 
-function renderCommands() {
+function renderCommands(reuseSaved = false) {
   const grid = document.getElementById("command-grid");
   grid.innerHTML = "";
   const t = state.target;
   const stageIdx = t.fanatic < 35 ? 0 : (t.fanatic < 70 ? 1 : 2);
-  
-  const affirmCmd = COMMANDS_DATA.find(c => c.type === "affirm");
-  const others = COMMANDS_DATA.filter(c => c.type !== "affirm").sort(() => 0.5 - Math.random()).slice(0, 3);
-  const picks = [affirmCmd, ...others].sort(() => 0.5 - Math.random());
 
-  picks.forEach(cmd => {
-    const phraseSet = rand(cmd.variations);
-    const lineText = phraseSet[stageIdx];
+  let hand = [];
+
+  if (reuseSaved && Array.isArray(state.currentCommands) && state.currentCommands.length > 0) {
+    hand = state.currentCommands.map(item => {
+      const cmdObj = COMMANDS_DATA.find(c => c.type === item.type);
+      return { cmd: cmdObj, lineText: item.lineText };
+    }).filter(x => x.cmd);
+  }
+
+  if (hand.length === 0) {
+    // 1枚目: 必ず【全肯定】を入れて序盤の警戒心低下手段を保証
+    const affirmCmd = COMMANDS_DATA.find(c => c.type === "affirm");
+
+    // 2枚目: 未破壊ロックまたは弱点に有効なコマンドから1つ保証（手詰まり防止）
+    const activeEffectiveTypes = new Set();
+    t.locks.filter(l => !l.broken).forEach(l => l.effective.forEach(e => activeEffectiveTypes.add(e)));
+    t.weakness.effective.forEach(e => activeEffectiveTypes.add(e));
+    activeEffectiveTypes.delete("affirm");
+
+    const effectivePool = COMMANDS_DATA.filter(c => activeEffectiveTypes.has(c.type));
+    const guaranteedCmd = effectivePool.length > 0
+      ? rand(effectivePool)
+      : rand(COMMANDS_DATA.filter(c => c.type !== "affirm"));
+
+    // 残り2枚: 重複しないようにランダム選出
+    const usedTypes = new Set(["affirm", guaranteedCmd.type]);
+    const remainingPool = COMMANDS_DATA.filter(c => !usedTypes.has(c.type)).sort(() => 0.5 - Math.random());
+    const picks = [affirmCmd, guaranteedCmd, ...remainingPool.slice(0, 2)].sort(() => 0.5 - Math.random());
+
+    hand = picks.map(cmd => {
+      const phraseSet = rand(cmd.variations);
+      return { cmd, lineText: phraseSet[stageIdx] };
+    });
+
+    state.currentCommands = hand.map(h => ({ type: h.cmd.type, lineText: h.lineText }));
+  }
+
+  hand.forEach(({ cmd, lineText }) => {
     const btn = document.createElement("button");
     btn.className = "cmd-card";
     btn.disabled = state.waitingNext;
@@ -1476,6 +1624,7 @@ function executeCommand(cmd, lineText) {
   if (state.waitingNext) return;
   const t = state.target;
   state.observedThisTurn = false;
+  state.currentCommands = []; // 次ターン用に手札をリセット
   t.turnsLeft--;
 
   const hitLockMine = t.locks.find(l => !l.broken && l.mine.includes(cmd.type));
@@ -1503,7 +1652,6 @@ function executeCommand(cmd, lineText) {
   }
 
   const isWeakHit = t.weakness.effective.includes(cmd.type);
-  // 有効なロックをすべて抽出（複数同時破壊に対応）
   const targetableLocks = t.locks.filter(l => !l.broken && l.effective.includes(cmd.type));
 
   let mult = 1.0;
@@ -1518,7 +1666,6 @@ function executeCommand(cmd, lineText) {
   const fanaticGain = Math.round(cmd.fanaticBase * mult);
   t.fanatic = Math.min(100, t.fanatic + fanaticGain);
 
-  // 条件を満たしていれば、対応するすべてのロックを破壊
   let brokenMsgs = [];
   if (targetableLocks.length > 0 && (t.fanatic >= 30 || isWeakHit)) {
     targetableLocks.forEach(lock => {
@@ -1576,13 +1723,14 @@ function checkStateAfterAction() {
   } else if (t.turnsLeft <= 0) {
     handleTimeout();
   } else {
-    renderCommands();
+    renderCommands(true);
+    saveGame();
   }
 }
 
 function handleTimeout() {
   state.waitingNext = true;
-  renderCommands();
+  renderCommands(true);
   const t = state.target;
 
   if (t.caution >= 75) {
@@ -1593,21 +1741,22 @@ function handleTimeout() {
     document.getElementById("system-log").textContent = `⌛ 時間切れ！警戒心が高いまま帰したため通報された（捜査レベル +${increase}%）。`;
     updateUI();
     if (state.police >= 100) {
+      clearSaveData();
       setTimeout(() => showEnding("arrest"), 1300);
     } else {
-      showNextButton("次の日へ進む");
+      showNextButton("次の日へ進む", true);
     }
   } else {
     document.getElementById("speaker-name").textContent = "相談者（面談終了）";
     document.getElementById("dialogue-text").textContent = "「……今日は話を聞いていただきありがとうございました。そろそろ失礼します」";
     document.getElementById("system-log").textContent = `⌛ 時間切れ！陥落させきる前に相談者は帰ってしまった（通報はされなかった）。`;
-    showNextButton("次の日へ進む");
+    showNextButton("次の日へ進む", true);
   }
 }
 
 function handleReport() {
   state.waitingNext = true;
-  renderCommands();
+  renderCommands(true);
   let increase = state.roles.guard ? (state.roles.guard.tag === "police" ? 10 : 18) : 30;
   state.police = Math.min(100, state.police + increase);
 
@@ -1617,15 +1766,16 @@ function handleReport() {
   updateUI();
 
   if (state.police >= 100) {
+    clearSaveData();
     setTimeout(() => showEnding("arrest"), 1300);
   } else {
-    showNextButton("次の日へ進む");
+    showNextButton("次の日へ進む", true);
   }
 }
 
 function handleConvert() {
   state.waitingNext = true;
-  renderCommands();
+  renderCommands(true);
   const t = state.target;
   const lastBroken = t.locks[t.locks.length - 1];
 
@@ -1652,9 +1802,10 @@ function handleConvert() {
   updateUI();
 
   if (state.followers.length >= 25) {
+    clearSaveData();
     setTimeout(() => showEnding("true_god"), 1400);
   } else {
-    showNextButton("次の相談者を招き入れる");
+    showNextButton("次の相談者を招き入れる", true);
   }
 }
 
@@ -1680,11 +1831,13 @@ function checkUnlocks(f) {
   return unlockedNames;
 }
 
-function showNextButton(label) {
+function showNextButton(label, shouldSave = true) {
+  state.nextButtonLabel = label;
   const grid = document.getElementById("command-grid");
   grid.innerHTML = `<button class="cmd-card" style="grid-column: 1 / -1; text-align:center; border-color: var(--gold); background:#1f1c29;" onclick="advanceDay()">
     <div class="cmd-tag" style="font-size:0.95rem;">▶ ${label}</div>
   </button>`;
+  if (shouldSave) saveGame();
 }
 
 function advanceDay() {
@@ -1702,14 +1855,23 @@ function advanceDay() {
 }
 
 function triggerRandomEvent() {
-  // モーダル背後の前日テキストを翌朝シーンへ切り替え
+  const evIdx = Math.floor(Math.random() * RANDOM_EVENTS.length);
+  state.pendingEventIdx = evIdx;
+
   document.getElementById("speaker-name").textContent = `${state.day}日目・朝`;
   document.getElementById("dialogue-text").textContent = "「……夜明けとともに、聖堂の扉が激しく叩かれた――」";
   document.getElementById("system-log").textContent = "⚠️ 突発イベントが発生しました。対応を選択してください。";
+  updateUI();
+  saveGame();
 
-  const ev = rand(RANDOM_EVENTS);
+  renderEventModal(evIdx);
+}
+
+function renderEventModal(evIdx) {
+  const ev = RANDOM_EVENTS[evIdx];
   const overlay = document.getElementById("modal-overlay");
   const content = document.getElementById("modal-content");
+  modalClosableByBackdrop = false;
   overlay.style.display = "flex";
 
   let html = `<div class="modal-title"><span>${ev.title}</span></div>
@@ -1717,7 +1879,7 @@ function triggerRandomEvent() {
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">`;
   
   ev.choices.forEach((c, idx) => {
-    html += `<button class="event-choice-btn" onclick="resolveEvent(${RANDOM_EVENTS.indexOf(ev)}, ${idx})">▶ ${c.text}</button>`;
+    html += `<button class="event-choice-btn" onclick="resolveEvent(${evIdx}, ${idx})">▶ ${c.text}</button>`;
   });
   html += `</div>`;
   content.innerHTML = html;
@@ -1726,14 +1888,18 @@ function triggerRandomEvent() {
 function resolveEvent(evIdx, choiceIdx) {
   const ev = RANDOM_EVENTS[evIdx];
   const resText = ev.choices[choiceIdx].run();
+  state.pendingEventIdx = null;
+  modalClosableByBackdrop = true;
   closeModal();
   updateUI();
 
   if (state.police >= 100) {
+    clearSaveData();
     showEnding("arrest");
   } else {
     nextVisitor();
     document.getElementById("system-log").textContent = `【昨夜の出来事】${resText}`;
+    saveGame();
   }
 }
 
@@ -1755,6 +1921,7 @@ function updateUI() {
   }
 
   const t = state.target;
+  if (!t) return;
   document.getElementById("target-job").textContent = t.job;
   
   const turnBadge = document.getElementById("turn-badge");
@@ -1828,6 +1995,7 @@ function updateUI() {
 function openModal(type) {
   const overlay = document.getElementById("modal-overlay");
   const content = document.getElementById("modal-content");
+  modalClosableByBackdrop = true;
   overlay.style.display = "flex";
 
   if (type === "guide") {
@@ -1863,7 +2031,8 @@ function openModal(type) {
           <div class="guide-sec-title" style="color:#e082ff;">3. 聖堂の裏機能（上部メニューの使い方）</div>
           <p><strong>・聖堂の役職：</strong> 狂信化した信者を「サクラ」「門番」「監視役」に任命できます。面談の有利化や捜査レベルの抑制など強力な効果があり、特定の職業を配置すると効果が倍増します。<br>
           <strong>・📖 禁断の教義：</strong> 特定の職業や人数の信者を獲得すると解放される切り札です。<strong>1回の面談につき1度だけ、ターンを消費せず</strong>にロックの強制破壊や警戒心の大幅低下を行えます。<br>
-          <strong>・身代わり：</strong> 捜査レベルが危険域に達した際、狂信者1人にすべての罪を着せて自首させることで、捜査レベルを <strong>0%</strong> にリセットできます。</p>
+          <strong>・身代わり：</strong> 捜査レベルが危険域に達した際、狂信者1人にすべての罪を着せて自首させることで、捜査レベルを <strong>0%</strong> にリセットできます。<br>
+          <strong>・オートセーブ：</strong> 進行状況は自動的にブラウザに保存され、再読み込みしても続きから再開できます。</p>
         </div>
 
       </div>
@@ -1959,14 +2128,25 @@ function openModal(type) {
     content.innerHTML = html;
 
   } else if (type === "retire") {
-    let html = `<div class="modal-title"><span>教団の決断（エンディング分岐）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
+    let html = `<div class="modal-title"><span>教団の決断（エンディング分岐・データ管理）</span><button class="close-btn" onclick="closeModal()">✕</button></div>
       <p style="font-size:0.85rem; line-height:1.5;">現在の教団の状況に応じて、詐欺師としての幕引きを選択できます。</p>
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="event-choice-btn" onclick="showEnding('escape')">▶ 資産を持って海外へ高飛びする（いつでも可能）<br><span style="font-size:0.78rem; color:#999;">信者たちを置き去りにし、完璧な詐欺師として姿を消す。</span></button>
-        ${state.followers.length >= 10 ? `<button class="event-choice-btn" style="border-color:var(--gold);" onclick="showEnding('cult_city')">▶ 街全体を聖域として支配する（条件達成：狂信者10人以上）<br><span style="font-size:0.78rem; color:#c5a663;">警察も行政も信者で固め、この街の絶対的な神となる。</span></button>` : ""}
-        ${state.sacrificeCount >= 3 ? `<button class="event-choice-btn" style="border-color:#ff6b81;" onclick="showEnding('puppet_throne')">▶ 悲劇の聖職者としてメディアに君臨する（条件達成：身代わり3回以上）<br><span style="font-size:0.78rem; color:#ff8fa3;">すべての罪を幹部に着せ、世間の同情と寄付金を集める。</span></button>` : ""}
+        <button class="event-choice-btn" onclick="clearSaveData(); showEnding('escape')">▶ 資産を持って海外へ高飛びする（いつでも可能）<br><span style="font-size:0.78rem; color:#999;">信者たちを置き去りにし、完璧な詐欺師として姿を消す。</span></button>
+        ${state.followers.length >= 10 ? `<button class="event-choice-btn" style="border-color:var(--gold);" onclick="clearSaveData(); showEnding('cult_city')">▶ 街全体を聖域として支配する（条件達成：狂信者10人以上）<br><span style="font-size:0.78rem; color:#c5a663;">警察も行政も信者で固め、この街の絶対的な神となる。</span></button>` : ""}
+        ${state.sacrificeCount >= 3 ? `<button class="event-choice-btn" style="border-color:#ff6b81;" onclick="clearSaveData(); showEnding('puppet_throne')">▶ 悲劇の聖職者としてメディアに君臨する（条件達成：身代わり3回以上）<br><span style="font-size:0.78rem; color:#ff8fa3;">すべての罪を幹部に着せ、世間の同情と寄付金を集める。</span></button>` : ""}
+      </div>
+      <div style="border-top:1px solid #2b2b38; padding-top:10px; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.78rem; color:#888;">※進行状況は自動保存されています</span>
+        <button class="nav-btn" style="border-color:#555; color:#aaa;" onclick="confirmReset()">データを消去して最初から</button>
       </div>`;
     content.innerHTML = html;
+  }
+}
+
+function confirmReset() {
+  if (confirm("現在の進行データ（狂信者・日数・習得教義）をすべて消去し、1日目からやり直しますか？")) {
+    closeModal();
+    initGame(false);
   }
 }
 
@@ -1987,6 +2167,7 @@ function setRole(roleKey, followerIdStr) {
     }
   }
   updateUI();
+  saveGame();
 }
 
 function executeSacrifice(idx) {
@@ -2000,11 +2181,13 @@ function executeSacrifice(idx) {
   document.getElementById("news-text").textContent = `【週刊誌】『「すべて私がやりました」――謎の聖堂幹部（${victim.job}）が突然の自首』`;
   document.getElementById("system-log").textContent = `🩸 ${victim.job}がすべての罪を被って自首した。警察の捜査レベルが 0% にリセットされた！`;
   updateUI();
+  saveGame();
 }
 
 function showEnding(endType) {
   const overlay = document.getElementById("modal-overlay");
   const content = document.getElementById("modal-content");
+  modalClosableByBackdrop = false;
   overlay.style.display = "flex";
 
   const endings = {
@@ -2042,7 +2225,7 @@ function showEnding(endType) {
     <div style="font-size:0.82rem; color:#888; border-top:1px solid #333; padding-top:8px;">
       到達日数: ${state.day}日目 / 狂信者数: ${state.followers.length}人 / 身代わり回数: ${state.sacrificeCount}回 / 習得教義: ${state.unlockedForbidden.length}種
     </div>
-    <button class="primary-btn" onclick="closeModal(); initGame(false);">新たな聖堂を開く（最初から）</button>
+    <button class="primary-btn" onclick="modalClosableByBackdrop = true; closeModal(); initGame(false);">新たな聖堂を開く（最初から）</button>
   `;
 }
 
@@ -2050,7 +2233,14 @@ function closeModal() {
   document.getElementById("modal-overlay").style.display = "none";
 }
 
-// 初回起動時は説明書を自動表示
+// 背景タップでモーダルを閉じる（選択必須のイベント・エンディング時は無効）
+document.getElementById("modal-overlay").addEventListener("click", (e) => {
+  if (e.target.id === "modal-overlay" && modalClosableByBackdrop) {
+    closeModal();
+  }
+});
+
+// 起動処理（セーブデータがあれば復元、なければ新規開始＋説明書表示）
 initGame(true);
 </script>
 </body>
